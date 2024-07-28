@@ -15,6 +15,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { BaseComponent } from '../base/base.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
+import { ItemsService } from '@common/services/items/items.service';
+import { CustomersService } from '@common/services/customers/customers.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -35,6 +37,9 @@ import { Subscription } from 'rxjs';
 export class SideNavComponent extends BaseComponent implements OnInit, OnDestroy {
   backDropService = inject(BackdropService);
   messageService = inject(MessageService);
+  
+  itemsService = inject(ItemsService);
+  customersService = inject(CustomersService);
   translate: TranslateService = inject(TranslateService);
   showSideBar: boolean = false;
   showCompanySelectionDialog: boolean = false;
@@ -138,6 +143,8 @@ export class SideNavComponent extends BaseComponent implements OnInit, OnDestroy
           if (response) {
             this.settingsService.getUserSettings$().subscribe(() => {
               if (this.fieldName === 'company') {
+                this.itemsService.fetchItems();
+                this.customersService.fetchCustomers();
                 this.showMessage('Success', 'Company Updated.', 'success')
                 this.router.navigate(['/'])
               }

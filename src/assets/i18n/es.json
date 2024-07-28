@@ -2,9 +2,9 @@
     "NAV_BAR": {
         "DASHBOARD": "Panel de control",
         "DOCUMENTS": "Documentos",
-        "INVOICE": "Albran",
+        "DELIVERY_NOTE": "Albarán",
         "PROPOSALS": "Propuestas",
-        "BILL": "Factura",
+        "INVOICE": "Factura",
         "MANAGEMENT": "Gestión",
         "CUSTOMER_LIST": "Lista de clientes",
         "ITEM_LIST": "Lista de elementos",
@@ -18,5 +18,47 @@
         "MSG": "Datos para enriquecer tu negocio online",
         "MSG2":"Impulse su negocio en línea con textos atractivos y específicos que impulsen las ventas y generen lealtad a la marca",
         "LEARN_MORE": "Más información"
+    },
+    "DELIVERY_NOTE": {
+        "TITLE": "Albarán",
+        "CREATE": {
+          "BILL_TO": "Albarán",
+          "SELECT_CUSTOMER": "Seleccionar Cliente",
+          "PRODUCT_DESCRIPTION": "DESCRIPCIÓN DEL PRODUCTO",
+          "PRICE": "PRECIO",
+          "QUANTITY": "CANTIDAD",
+          "TOTAL": "TOTAL",
+          "NOTE": "Nota",
+          "DELIVERY_NOTE_NUMBER": "Albarán #",
+          "DATE": "Fecha",
+          "DUE_DATE": "Vencimiento",
+          "SUBTOTAL": "Subtotal",
+          "DISCOUNT": "Desc.",
+          "SHIPPING": "Envío",
+          "PENDING": "Antes",
+          "AMOUNT_DUE": "Total Pagar",
+          "SELECT_ITEM_PLACEHOLDER": "Seleccione el artículo para agregar",
+          "LOW_STOCK_WARNING": "¡Alerta: Stock bajo!"
+        },
+        "BREADCRUMB": {
+          "DOCUMENTS": "Documentos",
+          "DELIVERY_NOTES": "Albaránes",
+          "CREATE": "Crear"
+        },
+        "SAVE_BUTTON": "Guardar",
+        "SAVE_UPDATES_BUTTON": "Guardar Actualizaciones",
+        "DOWNLOAD_BUTTON": "Descargar",
+        "PRINT_BUTTON": "Imprimir",
+        "EDIT_BUTTON": "Editar",
+        "LIST": {
+            "TITLE": "Lista de Albaránes",
+            "RECORDS_FOUND": "Registros encontrados",
+            "FILTER_BY": "Filtrar por",
+            "CUSTOMER": "Cliente",
+            "ISSUED_DATE": "emisión",
+            "DUE_DATE": "Vencimiento",
+            "AMOUNT": "Monto",
+            "STATUS": "Estado"
+        }
     }
 }

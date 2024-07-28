@@ -1,0 +1,34 @@
+<form [formGroup]="receiveBulkStockForm" (ngSubmit)="onSubmit()">
+    <div formArrayName="stocks">
+      <div *ngFor="let stock of stocks.controls; let i = index" [formGroupName]="i">
+        <div>
+          <label for="item">Item</label>
+          <input id="item" formControlName="item">
+        </div>
+        <div>
+          <label for="lotNo">Lot No</label>
+          <input id="lotNo" formControlName="lotNo">
+        </div>
+        <div>
+          <label for="purchasePrice">Purchase Price</label>
+          <input id="purchasePrice" formControlName="purchasePrice">
+        </div>
+        <div>
+          <label for="totalStock">Total Stock</label>
+          <input id="totalStock" formControlName="totalStock">
+        </div>
+        <div>
+          <label for="stockReceivedDate">Stock Received Date</label>
+          <input id="stockReceivedDate" formControlName="stockReceivedDate" type="date">
+        </div>
+        <div>
+          <label for="description">Description</label>
+          <input id="description" formControlName="description">
+        </div>
+        <button type="button" (click)="removeStock(i)">Remove</button>
+      </div>
+    </div>
+    <button type="button" (click)="addStock()">Add Stock</button>
+    <button type="submit">Submit</button>
+  </form>
+  

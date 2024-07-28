@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SharedModule } from '@common/shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { injectSpeedInsights } from '@vercel/speed-insights';;
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'invoice-management';
 
   constructor(public translate: TranslateService) {
@@ -22,6 +23,10 @@ export class AppComponent {
     // if (browserLang) {
     //   translate.use(browserLang.match(/en|es/) ? browserLang : 'es');
     // }
+  }
+
+  ngOnInit(): void {
+    injectSpeedInsights();
   }
 
 }

@@ -46,7 +46,7 @@ export class GeneralSettingsComponent {
 
   languages: any[] = [
     {
-      label: 'Spanish',
+      label: 'Español',
       value: 'Spanish'
     },
     {

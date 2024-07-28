@@ -15,6 +15,7 @@ export class ConfirmDialogComponent implements OnChanges {
   @Input() allowHide:boolean = true;
   @Input() data!: any;
   @Input() title!: string;
+  @Input() width: string = 'inherit';
 
   @Output() hide = new EventEmitter<boolean>();
   constructor() {

@@ -1,0 +1,19 @@
+@if(selectedItemId && selectedItem && nextLotNo) {
+}
+<app-confirm-dialog [showDialog]="showStockReceivingDialog" (hide)="onHideUpdateDialog($event)"
+    [title]="'Receive Stock'">
+    @if (mode === 'single') {
+        <app-receive-stock-form
+        [itemId] = "selectedItemId"
+        [selectedItem] = "selectedItem"
+        [nextLotNo] = "nextLotNo"
+        (submitEvent)="onStockReceiveSubmit($event)"
+        (cancelEvent)="onStockReceiveCancel($event)"
+        ></app-receive-stock-form>
+    } @else if (mode === 'bulk') {
+        <app-receive-bulk-stock-form
+    
+        ></app-receive-bulk-stock-form>
+    }
+
+</app-confirm-dialog>

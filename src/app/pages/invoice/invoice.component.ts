@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { Component, CreateEffectOptions, effect, inject, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '@common/components/layout/page-header/page-header.component';
-import { InvoicesPaginator } from '@common/interfaces/invoices.interface';
+import { Invoice, InvoicesPaginator } from '@common/interfaces/invoices.interface';
 import { InvoicesService } from '@common/services/invoices/invoices.service';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { MenuItem } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
@@ -16,6 +16,9 @@ import { CustomCurrencyPipe } from '@common/pipes/custom-currency.pipe';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DataSharingService } from '@common/services/data-sharing/data-sharing.service';
 import { CurrencyService } from '@common/services/currency/currency.service';
+import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module';
+import { ToastWrapperModule } from '@common/shared/toast.module';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-invoice',
@@ -30,7 +33,10 @@ import { CurrencyService } from '@common/services/currency/currency.service';
     FormsModule,
     PageHeaderComponent,
     CustomCurrencyPipe,
-    InputNumberModule
+    InputNumberModule,
+    ConfirmDialogWrapperModule,
+    ToastWrapperModule,
+    TranslateModule
   ],
   templateUrl: './invoice.component.html',
   styleUrl: './invoice.component.scss'
@@ -40,6 +46,9 @@ export class InvoiceComponent implements OnInit {
   private router = inject(Router);
   private dataSharingService = inject(DataSharingService);
   private currencyService = inject(CurrencyService);
+  private confirmationService: ConfirmationService = inject(ConfirmationService);
+  private messageService: MessageService = inject(MessageService);
+
   userSettings!: any;
 
   public paginator$!: Observable<InvoicesPaginator>;
@@ -73,6 +82,9 @@ export class InvoiceComponent implements OnInit {
     this.paginator$ = this.loadInvoices$();
 
     this.params['searchField'] = this.selectedOption.value;
+
+    this.params['sortBy'] = 'invoiceNumber';
+    this.params['sortOrder'] = 'desc';
 
     const options: CreateEffectOptions = {
       allowSignalWrites: true
@@ -132,7 +144,7 @@ export class InvoiceComponent implements OnInit {
     return this.page$.pipe(
       tap(() => this.loading$.next(true)),
       switchMap((page) => this.api.getInvoices$(this.params, page)),
-      scan(this.updatePaginator, {invoices: [], page: 0, hasMorePages: true} as InvoicesPaginator),
+      scan(this.updatePaginator, {invoices: [], page: 0, hasMorePages: true, total: 0} as InvoicesPaginator),
       tap(() => this.loading$.next(false)),
     );
   }
@@ -167,9 +179,9 @@ export class InvoiceComponent implements OnInit {
           command: () => this.updateAction(event, invoice, index)
       },
       {
-          label: 'Delete',
-          icon: 'pi pi-times',
-          command: () => this.deleteAction(event, invoice, index)
+          label: 'Sale Return',
+          icon: 'pi pi-arrow-left',
+          command: () => this.saleReturnAction(event, invoice, index)
       }
     ]
   }
@@ -186,13 +198,54 @@ export class InvoiceComponent implements OnInit {
     this.navigateToEditInvoice(invoice._id);
   }
 
-  deleteAction(event: MouseEvent, invoice: any, index: number) {
+  saleReturnAction(event: MouseEvent, invoice: Invoice, index: number) {
     event.stopPropagation();
     event.preventDefault();
 
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to revert the sale?',
+      header: 'Sale Return Confirmation',
+      icon: 'pi pi-info-circle',
+      accept: () => {
+        this.api.saleReturnInvoice$(invoice).subscribe({
+          next: (response) => {
+            this.showMessage('Sale Return Successful', 'The stock is reverted and deleted the invoice.', 'success');
+            invoice.deleted = true;
+          },
+          error: (error) => {
+            console.error('Update failed', error);
+            this.handleError(error);
+          }
+        })
+        // Your delete logic here
+        console.log('Delete action triggered'+index, invoice);
+        // invoice.deleted = true;
+      },
+      reject: () => {
+          console.log('Rejected');
+      },
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
+      rejectButtonStyleClass: 'mr-4 mt-3 inline-flex w-full justify-center rounded-md text-white px-3 py-2 text-sm font-semibold bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 hover:text-gray-900 sm:mt-0 sm:w-auto',
+      acceptButtonStyleClass: 'mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-800 hover:text-gray-50 sm:mt-0 sm:w-auto'
+    });
+  }
 
-      // Your delete logic here
-      console.log('Delete action triggered'+index, invoice);
+  showMessage(summary:string, detail: string, severity: string = 'error') {
+    this.messageService.add({
+      severity: severity,
+      summary: summary,
+      detail: detail
+    });
+  }
+
+  handleError(errorResp: any) {
+    if (errorResp?.error?.message) {
+      const { error, message } = errorResp?.error?.message;
+      if (error && message) {
+        this.showMessage(error, message);
+      }
+    }
   }
 
   onAddInvoice(event: any) {

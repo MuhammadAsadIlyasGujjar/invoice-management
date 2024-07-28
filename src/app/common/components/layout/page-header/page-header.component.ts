@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { BackdropService } from '@common/services/signals/backdrop.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-page-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './page-header.component.html',
   styleUrl: './page-header.component.scss'
 })

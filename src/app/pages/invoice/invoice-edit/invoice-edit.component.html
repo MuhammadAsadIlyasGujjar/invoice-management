@@ -1,6 +1,11 @@
 <p-toast position="top-right"></p-toast>
 <p-confirmDialog></p-confirmDialog>
-<app-page-header class="print:hidden" [heading]="'Invoice'" [heading2]="'Invoice'" [showActionButton]="false"></app-page-header>
+<app-receive-stock
+    [selectedItemId]="selectedItemId"
+    [selectedItem]="selectedItem"
+    (closeEvent)="onCloseReceiveStockDialog($event)"
+></app-receive-stock>
+<app-page-header class="print:hidden" [heading]="'DELIVERY_NOTE.TITLE'" [heading2]="'DELIVERY_NOTE.TITLE'" [showActionButton]="false"></app-page-header>
 <div class="print:hidden mt-12 flex flex-col sm:flex-row w-full justify-between">
     <div class="m-4 flex flex-col justify-center">
         <nav class="flex" aria-label="Breadcrumb">
@@ -8,21 +13,21 @@
               <li class="inline-flex items-center">
                 <a class="inline-flex items-center text-sm font-medium text-gray-700 ">
                   <i class="material-icons">description</i>
-                  Documents
+                  {{ 'DELIVERY_NOTE.BREADCRUMB.DOCUMENTS' | translate }}
                 </a>
               </li>
               <li>
                 <div class="flex items-center">
                     <i class="material-icons">navigate_next</i>
-                    <a [routerLink]="['/invoice']" class="ms-1 text-sm font-medium cursor-pointer text-gray-700 hover:text-blue-600 lg:ms-2">
-                        Invoices
+                    <a routerLink="/invoice" class="ms-1 text-sm font-medium cursor-pointer text-gray-700 hover:text-blue-600 lg:ms-2">
+                        {{ 'DELIVERY_NOTE.BREADCRUMB.DELIVERY_NOTES' | translate }}
                     </a>
                 </div>
               </li>
               <li aria-current="page">
                 <div class="flex items-center">
                   <i class="material-icons">navigate_next</i>
-                  <span class="ms-1 text-sm font-medium text-gray-500 lg:ms-2 ">{{invoice.invoiceNumber}}</span>
+                  <span class="ms-1 text-sm font-medium text-gray-500 lg:ms-2 ">{{invoice?.invoiceNumber}}</span>
                 </div>
               </li>
             </ol>
@@ -30,7 +35,7 @@
     </div>
     <div class="m-4 flex justify-end">
         <a (click)="submitInvoice()" class="cursor-pointer inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-zinc-900 py-1 px-3 text-white hover:bg-zinc-700">
-            <span class="mr-2">Save Updates</span> <span class="material-icons">save</span>
+            <span class="mr-2">{{ 'DELIVERY_NOTE.SAVE_UPDATES_BUTTON' | translate }}</span> <span class="material-icons">save</span>
         </a>
     </div>
 </div>
@@ -42,12 +47,12 @@
             <form [formGroup]="invoiceForm">
                 <div class="flex flex-col lg:flex-row items-start justify-between my-10">
                     <div class="w-full">
-                        <span class="text-lg font-bold">Bill to:</span>
+                        <span class="text-lg font-bold">{{ 'DELIVERY_NOTE.CREATE.BILL_TO' | translate }}:</span>
                         <div class="w-full flex items-center gap-2">
                             <p-dropdown 
                                 formControlName="customer"
                                 class="custom-input-class"
-                                [options]="customers" [filter]="true" filterBy="label" placeholder="Select Customer"
+                                [options]="customers" [filter]="true" filterBy="label" placeholder="{{ 'DELIVERY_NOTE.CREATE.SELECT_CUSTOMER' | translate }}"
                                 [virtualScroll]="true" [virtualScrollItemSize]="66">
                             
                                 <ng-template let-item pTemplate="item">
@@ -75,23 +80,23 @@
                         </div>
                     </div>
                     <div class="flex flex-col items-end w-full">
-                        <div class="text-base font-semibold flex flex-col lg:flex-row justify-between items-center mt-2 w-full lg:w-80 h-10">
-                            <div class="lg:w-48 w-full">Invoice # </div>
-                            <div class="text-sm w-full">
-                                {{invoice.invoiceNumber}}
+                        <div class="text-base font-semibold flex gap-3 flex-col lg:flex-row justify-between items-center mt-2 w-full h-10">
+                            <div class="flex items-center justify-end h-10 w-full">{{ 'DELIVERY_NOTE.CREATE.DELIVERY_NOTE_NUMBER' | translate }}: </div>
+                            <div class="text-sm w-full lg:w-48">
+                                TBD
                             </div>
                         </div>
-                        <div class="text-base font-semibold flex flex-col lg:flex-row justify-between items-center mt-2 w-full lg:w-80">
-                            <div class="flex items-center lg:w-48 h-10 w-full">Date: </div>
-                            <div class="text-sm w-full">
+                        <div class="text-base font-semibold flex gap-3 flex-col lg:flex-row justify-between items-center mt-2 w-full">
+                            <div class="flex items-center justify-end h-10 w-full">{{ 'DELIVERY_NOTE.CREATE.DATE' | translate }}: </div>
+                            <div class="text-sm w-full lg:w-48">
                                 <p-calendar
                                 formControlName="date"
                                 class="custom-input-class sm:pl-2" [iconDisplay]="'input'" [showIcon]="true"></p-calendar>
                             </div>
                         </div>
-                        <div class="text-base font-semibold flex flex-col lg:flex-row justify-between items-center mt-2 w-full lg:w-80">
-                            <div class="flex items-center lg:w-48 h-10 w-full">Due Date: </div>
-                            <div class="text-sm w-full">
+                        <div class="text-base font-semibold flex gap-3 flex-col lg:flex-row justify-between items-center mt-2 w-full">
+                            <div class="flex items-center justify-end h-10 w-full">{{ 'DELIVERY_NOTE.CREATE.DUE_DATE' | translate }}: </div>
+                            <div class="text-sm w-full lg:w-48">
                                 <p-calendar
                                 formControlName="dueDate"
                                 class="custom-input-class sm:pl-2" [iconDisplay]="'input'" [showIcon]="true"></p-calendar>
@@ -107,24 +112,28 @@
                                 <th class="p-4 border border-e-0 max-w-9 min-w-9">
 
                                 </th>
-                                <th class="p-4 border border-e-0 uppercase text-sm font-medium text-start">Product Description</th>
-                                <th class="p-4 border-y uppercase text-sm font-medium ">Price</th>
-                                <th class="p-4 pe-7 border-y uppercase text-sm font-medium">Qty</th>
-                                <th class="p-4 border border-s-0 uppercase text-sm font-medium">Total</th>
+                                <th class="p-4 border border-e-0 uppercase text-sm font-medium text-start">{{ 'DELIVERY_NOTE.CREATE.PRODUCT_DESCRIPTION' | translate }}</th>
+                                <th class="p-4 border-y uppercase text-sm font-medium ">{{ 'DELIVERY_NOTE.CREATE.PRICE' | translate }}</th>
+                                <th class="p-4 pe-7 border-y uppercase text-sm font-medium">{{ 'DELIVERY_NOTE.CREATE.QUANTITY' | translate }}</th>
+                                <th class="p-4 border border-s-0 uppercase text-sm font-medium">{{ 'DELIVERY_NOTE.CREATE.TOTAL' | translate }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white">
                             <ng-container formArrayName="items">
                                 <tr *ngFor="let item of itemsFormArray.controls; let i=index" [formGroupName]="i">
                                     <td class="text-base font-medium border max-w-9 min-w-9">
-                                        <span (click)="removeItem(i)" class="material-icons cursor-pointer" *ngIf="itemsFormArray.controls.length > 1 && i !== (itemsFormArray.controls.length - 1)">cancel</span>
+                                        <div class="flex justify-evenly w-full h-full items-center">
+                                            <span (click)="removeItem(i)" class="material-icons cursor-pointer" *ngIf="itemsFormArray.controls.length > 1 && i !== (itemsFormArray.controls.length - 1)">cancel</span>
+                                            <span (click)="generateMenuInvoices($event, i);menu.toggle($event)" class="material-icons cursor-pointer" *ngIf="getItemId(i)">more_vert</span>
+                                            <p-menu #menu [model]="actionInvoices" [popup]="true" appendTo="body"></p-menu>
+                                        </div>
                                     </td>
                                     <td class="text-base font-medium border max-w-60 min-w-60">
                                         <p-dropdown
                                         formControlName="item"
                                         appendTo="body"
                                         class="custom-input-class !border-none"
-                                        [options]="items" [filter]="true" filterBy="label" placeholder="Select your item to add"
+                                        [options]="items" [filter]="true" filterBy="label" placeholder="{{ 'DELIVERY_NOTE.CREATE.SELECT_ITEM_PLACEHOLDER' | translate }}"
                                         [virtualScroll]="true" [virtualScrollItemSize]="66">
                                     
                                         <ng-template let-item pTemplate="item">
@@ -146,6 +155,10 @@
                                             </div>
                                         </ng-template>
                                     </p-dropdown>
+                                    
+                                    <div *ngIf="notHaveEnoughtStock(i)" class="w-full flex justify-start p-2">
+                                        <span class="text-sm text-red-700">{{ 'DELIVERY_NOTE.CREATE.LOW_STOCK_WARNING' | translate }}</span>
+                                    </div>
                                     </td>
                                     <td class="text-base font-medium border text-center w-auto">
                                         <p-inputNumber
@@ -177,14 +190,14 @@
                                 <td class="p-8 text-base font-medium border text-center"></td>
                             </tr>
                             <tr class="bg-gray-100">
-                                <td colspan="5" class="p-1 ps-5 text-base font-medium border">Note</td>
+                                <td colspan="5" class="p-1 ps-5 text-base font-medium border">{{ 'DELIVERY_NOTE.CREATE.NOTE' | translate }}</td>
                             </tr>
                             <tr>
-                                <td colspan="4" rowspan="3" class="p-5 text-sm font-medium border border-e-0">
+                                <td colspan="4" rowspan="4" class="p-5 text-sm font-medium border border-e-0">
                                     <textarea formControlName="note" class="!h-44 custom-input-class" pInputTextarea ></textarea>
                                 </td>
                                 <td class="flex flex-row justify-center p-5 text-base font-medium border text-center bg-gray-100">
-                                    <div class="flex justify-end w-1/2"><b class="mr-2">Subtotal:</b></div>
+                                    <div class="flex justify-end w-1/2"><b class="mr-2">{{ 'DELIVERY_NOTE.CREATE.SUBTOTAL' | translate }}:</b></div>
                                     <div class="flex justify-start w-1/2">
                                         {{currencySymbol}} {{invoiceForm.get('subtotal')?.value?.toFixed(2) || 0}}
                                     </div>
@@ -192,7 +205,7 @@
                             </tr>
                             <tr>
                                 <td class="flex flex-row items-center justify-center p-5 text-base font-medium border text-center bg-gray-100">
-                                    <div class="flex justify-end w-1/2"><b class="mr-2">Discount:</b></div>
+                                    <div class="flex justify-end w-1/2"><b class="mr-2">{{ 'DELIVERY_NOTE.CREATE.DISCOUNT' | translate }}:</b></div>
                                     <div class="flex justify-start w-1/2">
                                         <p-inputNumber
                                         formControlName="discount"
@@ -203,7 +216,7 @@
                             </tr>
                             <tr>
                                 <td class="flex flex-row items-center justify-center p-5 text-base font-medium border text-center bg-gray-100">
-                                    <div class="flex justify-end w-1/2"><b class="mr-2">Shipping:</b></div>
+                                    <div class="flex justify-end w-1/2"><b class="mr-2">{{ 'DELIVERY_NOTE.CREATE.SHIPPING' | translate }}:</b></div>
                                     <div class="flex justify-start w-1/2">
                                         <p-inputNumber
                                         formControlName="shippingCharges"
@@ -213,8 +226,19 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="5" class="p-5 text-base font-medium border text-end"><b class="mr-2">Amount due:</b> 
-                                    <span>{{currencySymbol}} {{invoiceForm.get('amountDue')?.value?.toFixed(2) || 0}}</span>
+                                <td class="flex flex-row items-center justify-center p-5 text-base font-medium border text-center bg-gray-100">
+                                    <div class="flex justify-end w-1/2"><b class="mr-2">{{ 'DELIVERY_NOTE.CREATE.PENDING' | translate }}:</b></div>
+                                    <div class="flex justify-start w-1/2">
+                                        <p-inputNumber
+                                        formControlName="pendingPayment"
+                                        class="custom-input-class number-center !border-none" [prefix]="currencySymbol"
+                                        inputId="minmaxfraction" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"> </p-inputNumber>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="p-5 text-base font-medium border text-end"><b class="mr-2">{{ 'DELIVERY_NOTE.CREATE.AMOUNT_DUE' | translate }}:</b> 
+                                    <span>{{currencySymbol}} {{totalAmountDue}}</span>
                                 </td>
                             </tr>
                         </tbody>

@@ -10,6 +10,7 @@ import { BaseUrlInterceptor } from '@common/interceptors/base-url.interceptor';
 import { LoaderInterceptor } from '@common/interceptors/loader.interceptor';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { NgxEchartsModule } from 'ngx-echarts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +26,9 @@ export const appConfig: ApplicationConfig = {
         },
         defaultLanguage: 'en', // change here en to fr to see french language default.
       })
+    ),
+    importProvidersFrom(
+      NgxEchartsModule.forRoot({ echarts: () => import('echarts') })
     ),
     provideAnimations(),
     {

@@ -69,12 +69,14 @@ export class UserManagementComponent implements OnInit {
   selectedSortOrderLabel: string = this.labelBySelectedSortOrder;
 
   showUpdateDialog: boolean = false;
+  showActivationLinkDialog: boolean = false;
   selectedUser: any;
 
   expandUserManagementDetail: any = {};
 
   serverBaseUrl = serverUrl;
   userSettings!: any;
+  activationLink!: string;
   constructor(
     @Inject(DOCUMENT) private document: Document
   ) {
@@ -166,6 +168,7 @@ export class UserManagementComponent implements OnInit {
 
   onHideUpdateDialog(flag: boolean) {
     this.showUpdateDialog = flag;
+    this.showActivationLinkDialog = flag;
     this.selectedUser = null;
   }
 
@@ -369,6 +372,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   copyToClipboard(text: string) {
+    this.activationLink = text;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(() => {
         this.messageService.add({
@@ -379,11 +383,7 @@ export class UserManagementComponent implements OnInit {
         console.log('Text copied to clipboard');
       }).catch(err => {
         console.error('Failed to copy: ', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Failed to copy',
-          detail: err
-        });
+        this.fallbackCopyTextToClipboard(text);
       });
     } else {
       this.fallbackCopyTextToClipboard(text);
@@ -395,27 +395,48 @@ export class UserManagementComponent implements OnInit {
     textArea.value = text;
   
     // Avoid scrolling to bottom
+    textArea.style.position = 'fixed';
     textArea.style.top = '0';
     textArea.style.left = '0';
-    textArea.style.position = 'fixed';
+    textArea.style.width = '2em';
+    textArea.style.height = '2em';
+    textArea.style.padding = '0';
+    textArea.style.border = 'none';
+    textArea.style.outline = 'none';
+    textArea.style.boxShadow = 'none';
+    textArea.style.background = 'transparent';
+    textArea.style.opacity = '0';
   
     document.body.appendChild(textArea);
+  
     textArea.focus();
-    textArea.select();
+    textArea.setSelectionRange(0, textArea.value.length); // For iOS compatibility
   
     try {
-      document.execCommand('copy');
-      console.log('Fallback: Text copied to clipboard');
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Link copied to clipboard'
-      });
-    } catch (err) {
-      console.error('Fallback: Failed to copy text to clipboard', err);
+      const successful = document.execCommand('copy');
+      if (successful) {
+        console.log('Fallback: Text copied to clipboard');
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Link copied to clipboard'
+        });
+      } else {
+        this.showActivationLinkDialog = true;
+        throw new Error('Fallback: Failed to copy activation link to clipboard');
+      }
+    } catch (err: any) {
+      this.showActivationLinkDialog = true;
+      console.error('Fallback: Failed to copy activation link to clipboard', err);
+      // this.messageService.add({
+      //   severity: 'error',
+      //   summary: 'Failed to copy',
+      //   detail: err?.message || err
+      // });
     }
   
     document.body.removeChild(textArea);
   }
+  
 
 }

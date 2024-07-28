@@ -11,3 +11,10 @@
     font-size: 0.85em;
     color: #666;
   }
+
+  .dropdown-full-width .p-dropdown-panel {
+    width: auto !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box;
+}

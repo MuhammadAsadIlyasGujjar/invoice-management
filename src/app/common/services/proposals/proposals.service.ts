@@ -37,7 +37,8 @@ export class ProposalsService  extends BaseService {
       map((response) => ({
         proposals: response.proposals,
         page: page,
-        hasMorePages: response.skip + response.limit < response.total
+        hasMorePages: response.skip + response.limit < response.total,
+        total: response.total
       } as ProposalsPaginator))
     );
   }

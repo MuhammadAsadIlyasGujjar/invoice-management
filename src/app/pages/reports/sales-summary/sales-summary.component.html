@@ -1,0 +1,18 @@
+<div class="flex flex-col w-full">
+    <div class="flex flex-row justify-between">
+        <div class="mb-2 w-1/3">
+            <p-tabMenu 
+            [model]="views" 
+            [activeItem]="activeView" 
+            (activeItemChange)="onActiveViewChange($event)" />
+        </div>
+        <div class="w-2/3">
+            <app-report-filters (filterParamsChanged)="filterParamsChanged($event)"></app-report-filters>
+        </div>
+    </div>
+    @if(activeView?.label === 'Table') {
+        <app-dynamic-table></app-dynamic-table>
+    } @else {
+        <app-dynamic-bar-chart></app-dynamic-bar-chart>
+    }
+</div>

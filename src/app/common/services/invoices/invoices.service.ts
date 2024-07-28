@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BaseService } from '../base/base.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { InvoicesJsonResponse, InvoicesPaginator } from '@common/interfaces/invoices.interface';
+import { Invoice, InvoicesJsonResponse, InvoicesPaginator } from '@common/interfaces/invoices.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +37,8 @@ export class InvoicesService  extends BaseService {
       map((response) => ({
         invoices: response.invoices,
         page: page,
-        hasMorePages: response.skip + response.limit < response.total
+        hasMorePages: response.skip + response.limit < response.total,
+        total: response.total
       } as InvoicesPaginator))
     );
   }
@@ -52,8 +53,23 @@ export class InvoicesService  extends BaseService {
       );
   }
 
-  public updateInvoice$(invoiceObjectId: string, createData: any): Observable<any> {
-    return this.http.put(`/invoices/${invoiceObjectId}`, createData)
+  public updateInvoice$(invoiceId: string, invoice: Invoice): Observable<any> {
+    const {customer, ...inv} = invoice;
+    const invoiceData = {customer: customer, ...inv};
+    return this.http.put(`/invoices/${invoiceId}`, invoiceData)
+      .pipe(
+        map(response => {
+          // Process the response if needed
+          return response;
+        })
+      );
+  }
+
+  public saleReturnInvoice$(invoice: Invoice): Observable<any> {
+    
+    const {company, customer, ...inv} = invoice;
+    const newInvoice = {company: company?._id, customer: customer?._id, ...inv};
+    return this.http.put(`/invoices/return/${invoice._id}`, newInvoice)
       .pipe(
         map(response => {
           // Process the response if needed

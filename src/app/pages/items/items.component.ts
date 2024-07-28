@@ -28,6 +28,7 @@ import { DataSharingService } from '@common/services/data-sharing/data-sharing.s
 import { CurrencyService } from '@common/services/currency/currency.service';
 import { BaseComponent } from '@common/components/base/base.component';
 import { AuthService } from '@common/services/auth/auth.service';
+import { ReceiveBulkStockFormComponent } from './receive-bulk-stock-form/receive-bulk-stock-form.component';
 
 @Component({
   selector: 'app-items',
@@ -44,6 +45,7 @@ import { AuthService } from '@common/services/auth/auth.service';
     ItemFormComponent,
     SalePriceAdjustmentFormComponent,
     ReceiveStockFormComponent,
+    ReceiveBulkStockFormComponent,
     ShowMoreDirective,
     CustomCurrencyPipe
   ],
@@ -88,6 +90,7 @@ export class ItemsComponent extends BaseComponent {
   selectedStockLot!: any;
   selectedItemId!: string | null;
   nextLotNo!: number;
+  receivedStockMode: 'single' | 'bulk' = 'single';
   
   constructor(protected override authService: AuthService) {
     super(authService);
@@ -210,7 +213,7 @@ export class ItemsComponent extends BaseComponent {
     return this.page$.pipe(
       tap(() => this.loading$.next(true)),
       switchMap((page) => this.api.getItems$(this.params, page)),
-      scan(this.updatePaginator, {items: [], page: 0, hasMorePages: true} as ItemsPaginator),
+      scan(this.updatePaginator, {items: [], page: 0, hasMorePages: true, total: 0} as ItemsPaginator),
       tap(() => {
         this.loading$.next(false);
         this.expandStockDetail = {};
@@ -257,6 +260,11 @@ export class ItemsComponent extends BaseComponent {
           icon: 'pi pi-plus',
           command: () => this.receiveStockAction(event, item, index)
         },
+        // {
+        //   label: 'Receive Bulk Stock',
+        //   icon: 'pi pi-plus',
+        //   command: () => this.receiveStockAction(event, item, index, 'bulk')
+        // },
         {
             label: 'Update Item',
             icon: 'pi pi-refresh',
@@ -281,7 +289,7 @@ export class ItemsComponent extends BaseComponent {
     this.selectedItem = item;
   }
 
-  receiveStockAction(event: MouseEvent, item: any, index: number) {
+  receiveStockAction(event: MouseEvent, item: any, index: number, mode: 'single' | 'bulk' = 'single') {
     event.stopPropagation();
     event.preventDefault();
     // Your update logic here
@@ -290,6 +298,7 @@ export class ItemsComponent extends BaseComponent {
     this.selectedItemId = this.selectedItem._id;
 
     this.selectedStockLot = null;
+    this.receivedStockMode = mode;
 
     if (this.selectedItemId) {
       this.inventoryService.largestLotNo$(this.selectedItemId).subscribe(largestLotNo => {

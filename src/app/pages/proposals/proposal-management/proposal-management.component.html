@@ -68,9 +68,9 @@
                 <div class="flex md:flex-row flex-col print:flex-row items-start justify-between my-10 print:my-2 mr-2">
                     <div>
                         <span class="text-lg font-bold print:text-base print:font-semibold">Proposal to:</span>
-                        <h4 class="text-base font-bold print:text-sm print:font-semibold">{{proposal.customer.name}}
-                        @if(proposal.customer.businessName) {
-                            <span> ({{proposal.customer.businessName}})</span>
+                        <h4 class="text-base font-bold print:text-sm print:font-semibold">{{proposal.customer?.name}}
+                        @if(proposal.customer?.businessName) {
+                            <span> ({{proposal.customer?.businessName}})</span>
                         }
                         </h4>
                     </div>

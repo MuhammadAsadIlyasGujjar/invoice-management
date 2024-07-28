@@ -7,7 +7,7 @@ import { CurrencyService } from '@common/services/currency/currency.service';
 import { CustomersService } from '@common/services/customers/customers.service';
 import { DataSharingService } from '@common/services/data-sharing/data-sharing.service';
 import { ItemsService } from '@common/services/items/items.service';
-import { ConfirmationService, MessageService, SelectItem } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService, SelectItem } from 'primeng/api';
 import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -21,6 +21,10 @@ import { Invoice, InvoiceItem } from '@common/interfaces/invoices.interface';
 import { Customer } from '@common/interfaces/customers.interface';
 import { AddCustomerComponent } from '@pages/customers/add-customer/add-customer.component';
 import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module';
+import { ReceiveStockComponent } from '@pages/items/receive-stock/receive-stock.component';
+import { MenuModule } from 'primeng/menu';
+import { Item } from '@common/interfaces/items.interface';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-invoice-edit',
@@ -29,6 +33,7 @@ import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module
     CommonModule,
     PageHeaderComponent,
     AddCustomerComponent,
+    ReceiveStockComponent,
     RouterLink,
     RouterLinkActive,
     DropdownModule,
@@ -39,7 +44,9 @@ import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module
     FormsModule,
     TooltipModule,
     ToastWrapperModule,
-    ConfirmDialogWrapperModule
+    ConfirmDialogWrapperModule,
+    MenuModule,
+    TranslateModule
   ],
   templateUrl: './invoice-edit.component.html',
   styleUrls: ['./invoice-edit.component.scss']
@@ -65,9 +72,14 @@ export class InvoiceEditComponent {
   private paramsSubscription!: Subscription;
 
   serverBaseUrl = serverUrl;
-  invoice!: Invoice;
+  invoice!: Invoice | null;
 
   hasUnsavedChanges: boolean = false; // Set this flag based on actual unsaved changes logic
+  lowStockItemIdsList: string[] = [];
+
+  actionInvoices!: MenuItem[];
+  selectedItemId!: string;
+  selectedItem!: Item | null;
 
   constructor() {
     this.customers = [];
@@ -79,7 +91,55 @@ export class InvoiceEditComponent {
     // Use effect to react to signal changes
     effect(() => {
       this.userSettings = this.dataSharingService.userSettings();
+      const itemsListSignal = this.itemsService.getItemsSignal();
+      this.items = itemsListSignal().map((item: any) => {
+        return {
+          label: `${item?.name} (${item?.baseUnitOfMeasure})`,
+          value: item._id,
+          item
+        };
+      });
+
+      const customersListSignal = this.customersService.getCustomersSignal()
+      this.customers = customersListSignal().map((customer: any) => {
+        return this.customerToListItemMapping(customer);
+      });
     }, options);
+  }
+
+  onCloseReceiveStockDialog(event: any) {
+    this.selectedItemId = '';
+    this.selectedItem = null;
+  }
+
+  generateMenuInvoices(event: MouseEvent, index: number) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.actionInvoices = [
+      {
+        label: 'Receive Stock',
+        icon: 'pi pi-plus',
+        command: () => this.receiveStockAction(event, index)
+      },
+      // {
+      //     label: 'Sale Return',
+      //     icon: 'pi pi-arrow-left',
+      //     command: () => this.saleReturnAction(event, invoice, index)
+      // }
+    ]
+  }
+
+  receiveStockAction(event: MouseEvent, index: number) {
+    console.log('Receive Stock Action', {index});
+    const itemId = this.getItemId(index);
+
+    if (itemId) {
+      this.selectedItemId = itemId;
+
+      const item = this.items.find((item: any) => item?.value === this.selectedItemId)
+      this.selectedItem = item.item;
+    }
   }
 
   // This method will be called by the guard
@@ -115,6 +175,7 @@ export class InvoiceEditComponent {
       subtotal: [0],
       discount: [null],
       shippingCharges: [null],
+      pendingPayment: [null],
       amountDue: [0],
       note: ['']
     });
@@ -135,22 +196,6 @@ export class InvoiceEditComponent {
         console.log('Add new item');
         this.addItem();
       }
-    });
-
-    this.customersService.createCustomersList$().subscribe(resp => {
-      this.customers = resp.map((customer: any) => {
-        return this.customerToListItemMapping(customer);
-      });
-    });
-
-    this.itemsService.getItemsList$().subscribe(resp => {
-      this.items = resp.map((item: any) => {
-        return {
-          label: `${item?.name} (${item?.baseUnitOfMeasure})`,
-          value: item._id,
-          item
-        };
-      });
     });
 
     // React to parameter changes
@@ -179,13 +224,14 @@ export class InvoiceEditComponent {
     this.invoicesService.getInvoice$(invoiceObjectId).subscribe({
       next: (response) => {
         this.invoice = response;
-
-        this.invoice.subTotal = this.calculateSubtotal(this.invoice.items);
-        this.invoice.items.forEach(item => {
-          this.addItem();
-        })
-
-        this.invoiceForm.patchValue(this.transformInvoiceToFormData(this.invoice));
+        if (this.invoice) {
+          this.invoice.subTotal = this.calculateSubtotal(this.invoice.items);
+          this.invoice.items.forEach(item => {
+            this.addItem();
+          })
+  
+          this.invoiceForm.patchValue(this.transformInvoiceToFormData(this.invoice));
+        }
         this.hasUnsavedChanges = false;
       },
       error: (error) => {
@@ -201,7 +247,7 @@ export class InvoiceEditComponent {
 
   transformInvoiceToFormData(invoice: Invoice) {
     return {
-      customer: invoice.customer._id,
+      customer: invoice?.customer?._id,
       date: new Date(invoice.date),
       dueDate: new Date(invoice.dueDate),
       items: invoice.items.map(item => ({
@@ -211,6 +257,7 @@ export class InvoiceEditComponent {
       })),
       discount: invoice?.discount?.toString(),
       shippingCharges: invoice?.shippingCharges?.toString(),
+      pendingPayment: invoice?.pendingPayment?.toString(),
       amountDue: invoice.amountDue,
       note: invoice.note || ''
     };
@@ -265,6 +312,18 @@ export class InvoiceEditComponent {
     this.updateTotals();
   }
 
+  getItemId(index: number) {
+    // Get the specific FormGroup from the FormArray using the index
+    const itemFormGroup = this.itemsFormArray.at(index) as FormGroup;
+
+    // Get the value of the 'item' control
+    return itemFormGroup.get('item')?.value;
+  }
+
+  notHaveEnoughtStock(index: number) {
+    return this.lowStockItemIdsList.indexOf(this.getItemId(index)) > -1;
+  }
+
   get itemsFormArray(): FormArray {
     return this.invoiceForm.get('items') as FormArray;
   }
@@ -299,6 +358,15 @@ export class InvoiceEditComponent {
     }, { emitEvent: false });
   }
 
+  get pendingPayment() {
+    let pendingPayment = this.invoiceForm.get('pendingPayment')?.value || 0;
+    return Number(pendingPayment);
+  }
+
+  get totalAmountDue() {
+    return (Number(this.invoiceForm.get('amountDue')?.value || 0) + this.pendingPayment)?.toFixed(2);
+  }
+
   get currencySymbol() {
     if (this.userSettings?.currency) {
       return this.currencyService.getCurrencySymbol(this.userSettings.currency);
@@ -314,7 +382,7 @@ export class InvoiceEditComponent {
     const itemsArray = this.itemsFormArray;
     this.removeItem(itemsArray.length - 1);
 
-    if (this.invoiceForm.valid && this.invoiceForm.value.items.length && this.invoice._id) {
+    if (this.invoiceForm.valid && this.invoiceForm.value.items.length && this.invoice?._id) {
         console.log(this.invoiceForm.value);
         this.updateInvoice(this.invoiceForm.value);
     } else {
@@ -325,20 +393,27 @@ export class InvoiceEditComponent {
     this.addItem(); // Add the last empty item row back
   }
 
-  updateInvoice(data: any) {
-    this.invoicesService.updateInvoice$(this.invoice._id, data).subscribe({
-      next: (response) => {
-        if (response?._id) {
-          const { _id } = response;
-          this.hasUnsavedChanges = false;
-          this.navigateToInvoice(_id);
-        }
-      },
-      error: (error) => {
+  updateInvoice(invoice: Invoice) {
+    this.lowStockItemIdsList = [];
+    if (this.invoice?._id) {
+      this.invoicesService.updateInvoice$(this.invoice?._id, invoice).subscribe({
+        next: (response) => {
+          if (response?._id) {
+            this.hasUnsavedChanges = false;
+            const { _id } = response;
+            this.navigateToInvoice(_id);
+          }
+        },
+        error: (error) => {
+          const {message, itemsList}: { message: string, itemsList: string[]} = error.error.message
         console.error('Update failed', error);
-        this.handleError(error);
-      }
-    });
+
+        this.showError('Fail invoice creation', message);
+        this.lowStockItemIdsList = itemsList;
+        console.log(this.lowStockItemIdsList);
+        }
+      });
+    }
   }
 
   handleError(errorResp: any) {

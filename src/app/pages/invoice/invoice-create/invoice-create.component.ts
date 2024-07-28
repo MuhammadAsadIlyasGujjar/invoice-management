@@ -7,7 +7,7 @@ import { CurrencyService } from '@common/services/currency/currency.service';
 import { CustomersService } from '@common/services/customers/customers.service';
 import { DataSharingService } from '@common/services/data-sharing/data-sharing.service';
 import { ItemsService } from '@common/services/items/items.service';
-import { ConfirmationService, MessageService, SelectItem } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService, SelectItem } from 'primeng/api';
 import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -20,6 +20,13 @@ import { ToastWrapperModule } from '@common/shared/toast.module';
 import { AddCustomerComponent } from '@pages/customers/add-customer/add-customer.component';
 import { Customer } from '@common/interfaces/customers.interface';
 import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module';
+import { MenuModule } from 'primeng/menu';
+import { InventoryService } from '@common/services/inventory/inventory.service';
+import { ConfirmDialogComponent } from '@common/components/confirm-dialog/confirm-dialog.component';
+import { ReceiveStockFormComponent } from '@pages/items/receive-stock-form/receive-stock-form.component';
+import { Item } from '@common/interfaces/items.interface';
+import { TranslateModule } from '@ngx-translate/core';
+import { isArray } from 'lodash';
 
 @Component({
   selector: 'app-invoice-create',
@@ -28,6 +35,8 @@ import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module
     CommonModule,
     PageHeaderComponent,
     AddCustomerComponent,
+    ConfirmDialogComponent,
+    ReceiveStockFormComponent,
     RouterLink,
     RouterLinkActive,
     DropdownModule,
@@ -38,7 +47,9 @@ import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module
     FormsModule,
     TooltipModule,
     ToastWrapperModule,
-    ConfirmDialogWrapperModule
+    ConfirmDialogWrapperModule,
+    MenuModule,
+    TranslateModule
   ],
   templateUrl: './invoice-create.component.html',
   styleUrls: ['./invoice-create.component.scss']
@@ -53,6 +64,7 @@ export class InvoiceCreateComponent {
   private messageService: MessageService = inject(MessageService);
   private confirmationService: ConfirmationService = inject(ConfirmationService);
   private router = inject(Router);
+  private inventoryService = inject(InventoryService);
 
   customers!: SelectItem[];
   items!: any[];
@@ -62,6 +74,14 @@ export class InvoiceCreateComponent {
 
   serverBaseUrl = serverUrl;
   hasUnsavedChanges: boolean = false; // Set this flag based on actual unsaved changes logic
+  lowStockItemIdsList: string[] = [];
+
+  actionInvoices!: MenuItem[];
+  nextLotNo!: number;
+  showStockReceivingDialog: boolean = false;
+
+  selectedItemId!: string;
+  selectedItem!: Item | null;
 
   constructor() {
     this.customers = [];
@@ -73,7 +93,87 @@ export class InvoiceCreateComponent {
     // Use effect to react to signal changes
     effect(() => {
       this.userSettings = this.dataSharingService.userSettings();
+      const itemsListSignal = this.itemsService.getItemsSignal();
+      this.items = itemsListSignal().map((item: any) => {
+        return {
+          label: `${item?.name} (${item?.baseUnitOfMeasure})`,
+          value: item._id,
+          item
+        };
+      });
+
+      const customersListSignal = this.customersService.getCustomersSignal()
+      this.customers = customersListSignal().map((customer: any) => {
+        return this.customerToListItemMapping(customer);
+      });
     }, options);
+  }
+
+  generateMenuInvoices(event: MouseEvent, index: number) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.actionInvoices = [
+      {
+        label: 'Receive Stock',
+        icon: 'pi pi-plus',
+        command: () => this.receiveStockAction(event, index)
+      },
+    ]
+  }
+
+  receiveStockAction(event: MouseEvent, index: number) {
+    console.log('Receive Stock Action', {index});
+    const itemId = this.getItemId(index);
+
+    if (itemId) {
+      this.selectedItemId = itemId;
+
+      const item = this.items.find((item: any) => item?.value === this.selectedItemId)
+      this.selectedItem = item.item;
+      this.inventoryService.largestLotNo$(itemId).subscribe(largestLotNo => {
+        this.nextLotNo = largestLotNo + 1;
+        this.showStockReceivingDialog = true;
+      })
+    }
+  }
+
+  onHideUpdateDialog(flag: boolean) {
+    this.showStockReceivingDialog = flag;
+  }
+
+  onStockReceiveSubmit(formData: any) {
+    console.log(formData);
+    if (this.selectedItem && this.selectedItem._id) {
+      this.receiveStock({...formData});
+    }
+  }
+
+  receiveStock(data: any) {
+    this.inventoryService.receiveInventory$(data).subscribe({
+      next: (response) => {
+        this.showStockReceivingDialog = false;
+        
+
+        this.selectedItem = null;
+        console.log('Update successful', response);
+
+        this.showMessage('Stock Received', 'Inventory is updated successfully.', 'success');
+        // this.page$.next(1);
+        // window.scrollTo(0, 0); 
+      },
+      error: (error) => {
+        console.error('Update failed', error);
+        this.handleError(error);
+      }
+    });
+  }
+
+  onStockReceiveCancel(event: any) {
+    console.log('onStockReceiveCancel', event);
+    if (event) {
+      this.showStockReceivingDialog = false;
+    }
   }
 
   // This method will be called by the guard
@@ -109,6 +209,7 @@ export class InvoiceCreateComponent {
       subtotal: [0],
       discount: [null],
       shippingCharges: [null],
+      pendingPayment: [null],
       amountDue: [0],
       note: ['']
     });
@@ -131,21 +232,6 @@ export class InvoiceCreateComponent {
       }
     });
 
-    this.customersService.createCustomersList$().subscribe(resp => {
-      this.customers = resp.map((customer: any) => {
-        return this.customerToListItemMapping(customer);
-      });
-    });
-
-    this.itemsService.getItemsList$().subscribe(resp => {
-      this.items = resp.map((item: any) => {
-        return {
-          label: `${item?.name} (${item?.baseUnitOfMeasure})`,
-          value: item._id,
-          item
-        };
-      });
-    });
   }
 
   onCustomerAdded(customer: Customer) {
@@ -200,8 +286,22 @@ export class InvoiceCreateComponent {
   }
 
   removeItem(index: number): void {
-    this.itemsFormArray.removeAt(index);
-    this.updateTotals();
+    if(this.itemsFormArray?.length) {
+      this.itemsFormArray.removeAt(index);
+      this.updateTotals();
+    }
+  }
+
+  getItemId(index: number) {
+    // Get the specific FormGroup from the FormArray using the index
+    const itemFormGroup = this.itemsFormArray.at(index) as FormGroup;
+
+    // Get the value of the 'item' control
+    return itemFormGroup.get('item')?.value;
+  }
+
+  notHaveEnoughtStock(index: number) {
+    return this.lowStockItemIdsList.indexOf(this.getItemId(index)) > -1;
   }
 
   get itemsFormArray(): FormArray {
@@ -238,6 +338,15 @@ export class InvoiceCreateComponent {
     }, { emitEvent: false });
   }
 
+  get pendingPayment() {
+    let pendingPayment = this.invoiceForm.get('pendingPayment')?.value || 0;
+    return Number(pendingPayment);
+  }
+
+  get totalAmountDue() {
+    return (Number(this.invoiceForm.get('amountDue')?.value || 0) + this.pendingPayment)?.toFixed(2);
+  }
+
   get currencySymbol() {
     if (this.userSettings?.currency) {
       return this.currencyService.getCurrencySymbol(this.userSettings.currency);
@@ -258,24 +367,44 @@ export class InvoiceCreateComponent {
         this.createInvoice(this.invoiceForm.value);
     } else {
         console.log('Form Invalid');
-        this.showError('Invoice Invalid', 'Required fields are missing');
+        this.showMessage('Invoice Invalid', 'Required fields are missing');
     }
 
     this.addItem(); // Add the last empty item row back
   }
 
   createInvoice(data: any) {
+    this.lowStockItemIdsList = [];
     this.invoicesService.createInvoice$(data).subscribe({
       next: (response) => {
         if (response?._id) {
+          this.hasUnsavedChanges = false;
           const { _id } = response;
           this.navigateToInvoice(_id);
         }
       },
       error: (error) => {
+        let {message, itemsList}: { message: any, itemsList: string[]} = error.error.message
         console.error('Update failed', error);
-        this.handleError(error);
+
+        if(isArray(message)) {
+          message = message.join(', ');
+        }
+
+        this.showMessage('Fail invoice creation', message);
+        if(itemsList.length) {
+          this.lowStockItemIdsList = itemsList;
+          console.log(this.lowStockItemIdsList);
+        }
       }
+    });
+  }
+
+  showMessage(summary:string, detail: string, severity: string = 'error') {
+    this.messageService.add({
+      severity: severity,
+      summary: summary,
+      detail: detail
     });
   }
 
@@ -283,17 +412,9 @@ export class InvoiceCreateComponent {
     if (errorResp?.error?.message) {
       const { error, message } = errorResp?.error?.message;
       if (error && message) {
-        this.showError(error, message);
+        this.showMessage(error, message);
       }
     }
-  }
-
-  showError(summary:string, detail: string) {
-    this.messageService.add({
-      severity: 'error',
-      summary: summary,
-      detail: detail
-    });
   }
 
   navigateToInvoice(invoiceId: string | number): void {

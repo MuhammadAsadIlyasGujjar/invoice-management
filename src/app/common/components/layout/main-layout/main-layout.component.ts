@@ -4,6 +4,8 @@ import { RouterOutlet } from '@angular/router';
 import { LoaderComponent } from '@common/components/loader/loader.component';
 import { SideNavComponent } from '@common/components/side-nav/side-nav.component';
 import { StopScrollDirective } from '@common/directives/stop-scroll.directive';
+import { CustomersService } from '@common/services/customers/customers.service';
+import { ItemsService } from '@common/services/items/items.service';
 import { BackdropService } from '@common/services/signals/backdrop.service';
 
 @Component({
@@ -15,6 +17,8 @@ import { BackdropService } from '@common/services/signals/backdrop.service';
 })
 export class MainLayoutComponent implements OnInit {
   backDropService = inject(BackdropService);
+  itemsService = inject(ItemsService);
+  customersService = inject(CustomersService);
   backdropVisible = this.backDropService.select('visible');
   constructor() {
     effect(() => {
@@ -22,6 +26,7 @@ export class MainLayoutComponent implements OnInit {
     });
   }
   ngOnInit(): void {
-    
+    this.itemsService.fetchItems();
+    this.customersService.fetchCustomers();
   }
 }

@@ -46,7 +46,7 @@ export class ShowMoreDirective implements OnInit {
       this.toggleElement = this.renderer.createElement('span');
       this.renderer.addClass(this.toggleElement, 'text-blue-400');
       this.renderer.addClass(this.toggleElement, 'cursor-pointer');
-      this.renderer.setProperty(this.toggleElement, 'innerText', 'Show more');
+      this.renderer.setProperty(this.toggleElement, 'innerText', 'more');
       this.renderer.listen(this.toggleElement, 'click', (event: Event) => {
         event.stopPropagation();
         this.toggleText();
@@ -62,7 +62,7 @@ export class ShowMoreDirective implements OnInit {
     } else {
       this.renderer.setProperty(this.el.nativeElement, 'innerText', this.fullText + ' ');
       this.renderer.appendChild(this.el.nativeElement, this.toggleElement);
-      this.renderer.setProperty(this.toggleElement, 'innerText', 'Show less');
+      this.renderer.setProperty(this.toggleElement, 'innerText', 'less');
     }
     this.isFullTextShown = !this.isFullTextShown;
     this.cdr.detectChanges();

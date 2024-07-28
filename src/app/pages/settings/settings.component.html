@@ -4,7 +4,7 @@
 </app-confirm-dialog>
 <div class="custom-page-container w-full lg:pl-4 pl-0 lg:pr-4 pr-0 flex justify-start">
     <div class="my-4 mt-16 flex flex-col w-full justify-center">
-        <div class="flex flex-col sm:flex-row w-full items-center justify-between bg-white shadow-md bg-clip-border rounded-md">
+        <div class="flex flex-col sm:flex-row w-full items-center justify-between mb-4 bg-white shadow-md bg-clip-border rounded-md">
             <p-tabView class="w-full" [(activeIndex)]="activeIndex">
                 <ng-container *ngIf="userHasPermission('manage-general-info')">    
                     <p-tabPanel header="General">

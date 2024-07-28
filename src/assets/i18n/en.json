@@ -2,9 +2,9 @@
     "NAV_BAR": {
         "DASHBOARD": "Dashboard",
         "DOCUMENTS": "Documents",
-        "INVOICE": "Invoice",
+        "DELIVERY_NOTE": "Delivery Note",
         "PROPOSALS": "Proposals",
-        "BILL": "Bill",
+        "INVOICE": "Invoice",
         "MANAGEMENT": "Management",
         "CUSTOMER_LIST": "Customer List",
         "ITEM_LIST": "Item List",
@@ -18,5 +18,47 @@
         "MSG": "Data to enrich your online business",
         "MSG2":"Boost your online business with engaging, targeted copy that drives sales and builds brand loyalty",
         "LEARN_MORE": "Learn more"
+    },
+    "DELIVERY_NOTE": {
+        "TITLE": "Delivery Note",
+        "CREATE": {
+            "BILL_TO": "To",
+            "SELECT_CUSTOMER": "Select Customer",
+            "PRODUCT_DESCRIPTION": "PRODUCT DESCRIPTION",
+            "PRICE": "PRICE",
+            "QUANTITY": "QTY",
+            "TOTAL": "TOTAL",
+            "NOTE": "Note",
+            "DELIVERY_NOTE_NUMBER": "Delivery Note #",
+            "DATE": "Date",
+            "DUE_DATE": "Due Date",
+            "SUBTOTAL": "Subtotal",
+            "DISCOUNT": "Discount",
+            "SHIPPING": "Shipping",
+            "PENDING": "Outstanding",
+            "AMOUNT_DUE": "Amount due",
+            "SELECT_ITEM_PLACEHOLDER": "Select your item to add",
+            "LOW_STOCK_WARNING": "Alert: Low stock!"
+        },
+        "BREADCRUMB": {
+            "DOCUMENTS": "Documents",
+            "DELIVERY_NOTES": "Delivery Notes",
+            "CREATE": "Create"
+        },
+        "SAVE_BUTTON": "Save",
+        "SAVE_UPDATES_BUTTON": "Update",
+        "DOWNLOAD_BUTTON": "Download",
+        "PRINT_BUTTON": "Print",
+        "EDIT_BUTTON": "Edit",
+        "LIST": {
+            "TITLE": "Delivery Notes List",
+            "RECORDS_FOUND": "Records Found",
+            "FILTER_BY": "Filter By",
+            "CUSTOMER": "Customer",
+            "ISSUED_DATE": "Issued Date",
+            "DUE_DATE": "Due Date",
+            "AMOUNT": "Amount",
+            "STATUS": "Status"
+        }
     }
 }

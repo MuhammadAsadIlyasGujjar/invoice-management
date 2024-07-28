@@ -26,4 +26,5 @@ export interface CustomersPaginator {
     customers: Customer[];
     page: number;
     hasMorePages: boolean;
+    total: number;
 }

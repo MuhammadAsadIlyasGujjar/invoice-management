@@ -175,7 +175,7 @@ export class CustomersComponent implements OnInit {
     return this.page$.pipe(
       tap(() => this.loading$.next(true)),
       switchMap((page) => this.api.getCustomers$(this.params, page)),
-      scan(this.updatePaginator, {customers: [], page: 0, hasMorePages: true} as CustomersPaginator),
+      scan(this.updatePaginator, {customers: [], page: 0, hasMorePages: true, total: 0} as CustomersPaginator),
       tap(() => this.loading$.next(false)),
     );
   }

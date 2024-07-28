@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { BaseService } from '../base/base.service';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map, of, tap } from 'rxjs';
 import { ItemsJsonResponse, ItemsPaginator } from '@common/interfaces/items.interface';
 
 @Injectable({
@@ -9,6 +9,7 @@ import { ItemsJsonResponse, ItemsPaginator } from '@common/interfaces/items.inte
 })
 export class ItemsService extends BaseService {
   private http = inject(HttpClient);
+  private itemsSignal: WritableSignal<any[]> = signal<any[]>([]);  // Initialize the signal with an empty array
 
   constructor() {
     super();
@@ -28,7 +29,8 @@ export class ItemsService extends BaseService {
       map((response) => ({
         items: response.items,
         page: page,
-        hasMorePages: response.skip + response.limit < response.total
+        hasMorePages: response.skip + response.limit < response.total,
+        total: response.total
       } as ItemsPaginator))
     );
   }
@@ -36,6 +38,7 @@ export class ItemsService extends BaseService {
   public createItem$(updateData: any): Observable<any> {
     return this.http.post(`/items`, updateData)
       .pipe(
+        tap(() => { this.fetchItems() }),
         map(response => {
           // Process the response if needed
           return response;
@@ -46,6 +49,7 @@ export class ItemsService extends BaseService {
   public updateItem$(itemId: string, updateData: any): Observable<any> {
     return this.http.put(`/items/${itemId}`, updateData)
       .pipe(
+        tap(() => { this.fetchItems() }),
         map(response => {
           // Process the response if needed
           return response;
@@ -81,6 +85,28 @@ export class ItemsService extends BaseService {
           return response.data;
         })
       );
+  }
+
+  fetchItems(): void {
+    this.getItemsList$()  // Adjust the API endpoint as needed
+      .pipe(
+        tap(items => {
+          this.itemsSignal.set(items);
+        }),  // Update the signal with fetched items
+        catchError(this.handleError<any[]>('fetchItems', []))
+      )
+      .subscribe();
+  }
+
+  getItemsSignal(): Signal<any[]> {
+    return this.itemsSignal;
+  }
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(error); // Log to console instead
+      return of(result as T);
+    };
   }
   
 }

@@ -73,6 +73,9 @@ export class ProposalsComponent implements OnInit {
 
     this.params['searchField'] = this.selectedOption.value;
 
+    this.params['sortBy'] = 'createdAt';
+    this.params['sortOrder'] = 'desc';
+
     const options: CreateEffectOptions = {
       allowSignalWrites: true
     };
@@ -131,7 +134,7 @@ export class ProposalsComponent implements OnInit {
     return this.page$.pipe(
       tap(() => this.loading$.next(true)),
       switchMap((page) => this.api.getProposals$(this.params, page)),
-      scan(this.updatePaginator, {proposals: [], page: 0, hasMorePages: true} as ProposalsPaginator),
+      scan(this.updatePaginator, {proposals: [], page: 0, hasMorePages: true, total: 0} as ProposalsPaginator),
       tap(() => this.loading$.next(false)),
     );
   }

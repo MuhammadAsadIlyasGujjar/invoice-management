@@ -75,6 +75,19 @@ export class ProposalEditComponent {
     // Use effect to react to signal changes
     effect(() => {
       this.userSettings = this.dataSharingService.userSettings();
+      const itemsListSignal = this.itemsService.getItemsSignal();
+      this.items = itemsListSignal().map((item: any) => {
+        return {
+          label: `${item?.name} (${item?.baseUnitOfMeasure})`,
+          value: item._id,
+          item
+        };
+      });
+
+      const customersListSignal = this.customersService.getCustomersSignal()
+      this.customers = customersListSignal().map((customer: any) => {
+        return this.customerToListItemMapping(customer);
+      });
     }, options);
   }
 
@@ -108,26 +121,6 @@ export class ProposalEditComponent {
       }
     });
 
-    this.customersService.createCustomersList$().subscribe(resp => {
-      this.customers = resp.map((customer: any) => {
-        return {
-          label: `${customer?.name} ${customer?.businessName ? 'Business:' : ''} ${customer?.businessName} ${customer?.nif ? 'NIF:' : ''} ${customer?.nif} ${customer?.cif ? 'CIF:' : ''} ${customer?.cif}`,
-          value: customer._id,
-          customer
-        };
-      });
-    });
-
-    this.itemsService.getItemsList$().subscribe(resp => {
-      this.items = resp.map((item: any) => {
-        return {
-          label: `${item?.name} (${item?.baseUnitOfMeasure})`,
-          value: item._id,
-          item
-        };
-      });
-    });
-
     // React to parameter changes
     this.paramsSubscription = this.route.params.subscribe(params => {
       this.proposalId = params['id'];
@@ -135,6 +128,14 @@ export class ProposalEditComponent {
         this.getProposalById(this.proposalId);
       }
     });
+  }
+
+  customerToListItemMapping(customer: any) {
+    return {
+      label: `${customer?.name} ${customer?.businessName ? 'Business:' : ''} ${customer?.businessName} ${customer?.nif ? 'NIF:' : ''} ${customer?.nif} ${customer?.cif ? 'CIF:' : ''} ${customer?.cif}`,
+      value: customer._id,
+      customer
+    };
   }
 
   getProposalById(proposalObjectId: string) {
@@ -162,7 +163,7 @@ export class ProposalEditComponent {
 
   transformProposalToFormData(proposal: Proposal) {
     return {
-      customer: proposal.customer._id,
+      customer: proposal?.customer?._id,
       date: new Date(proposal.date),
       dueDate: new Date(proposal.dueDate),
       items: proposal.items.map(item => ({

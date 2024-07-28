@@ -28,4 +28,5 @@ export interface ItemsPaginator {
     items: Item[];
     page: number;
     hasMorePages: boolean;
+    total: number;
 }

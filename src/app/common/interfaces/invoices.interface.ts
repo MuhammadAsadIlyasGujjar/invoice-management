@@ -7,13 +7,13 @@ export interface InvoicesJsonResponse {
   
 interface Customer {
   _id: string;
-  name: string;
-  email: string;
-  phone: string;
-  businessName: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  businessName?: string;
   cif: string;
   nif: string;
-  address: string;
+  address?: string;
   additionalInformation?: string;
   image?: string;
   deleted: boolean;
@@ -53,19 +53,28 @@ export interface InvoiceItem {
   item: ItemDetails;
   price: number;
   quantity: number;
+  lots?: LotDetails[]
+}
+
+export interface LotDetails {
+  _id: string;
+  lotId: string;
+  quantity: number;
+  lotNo: number;
 }
 
 export interface Invoice {
   _id: string;
-  invoiceNumber: number;
+  invoiceNumber?: number;
   isSent: boolean;
-  customer: Customer;
+  customer?: Customer;
   company: Company;
   date: Date;
   dueDate: Date;
   items: InvoiceItem[];
   discount: number;
   shippingCharges: number;
+  pendingPayment: number;
   amountDue: number;
   subTotal?: number;
   note?: string;
@@ -82,4 +91,5 @@ export interface InvoicesPaginator {
     invoices: Invoice[];
     page: number;
     hasMorePages: boolean;
+    total: number;
 }

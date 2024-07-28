@@ -7,10 +7,10 @@ export interface ProposalsJsonResponse {
   
 interface Customer {
   _id: string;
-  name: string;
+  name?: string;
   email: string;
   phone: string;
-  businessName: string;
+  businessName?: string;
   cif: string;
   nif: string;
   address: string;
@@ -58,7 +58,7 @@ export interface ProposalItem {
 export interface Proposal {
   _id: string;
   isSent: boolean;
-  customer: Customer;
+  customer?: Customer;
   company: Company;
   date: Date;
   dueDate: Date;
@@ -81,4 +81,5 @@ export interface ProposalsPaginator {
     proposals: Proposal[];
     page: number;
     hasMorePages: boolean;
+    total: number;
 }
