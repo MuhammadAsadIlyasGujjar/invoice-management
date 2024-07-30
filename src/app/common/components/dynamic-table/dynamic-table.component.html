@@ -1,20 +1,46 @@
 <div class="card">
     <div class="flex justify-content-center mb-3">
-    <p-table [value]="dataList" class="w-full" [tableStyle]="{ 'min-width': '50rem'}" styleClass="p-datatable-sm">
-        <ng-template pTemplate="header">
+        <table class="w-full table">
+        <thead>
             <tr>
                 @for (col of cols; track $index) {
-                    <th>{{col.label}}</th>
+                    <th  [ngStyle]="{'width': calculatedWidth}">{{col.label}}</th>
                 }
             </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-dataItem>
-            <tr>
-                @for (col of cols; track $index) {
-                    <td>{{ dataItem[col.key] }}</td>
-                }
-            </tr>
-        </ng-template>
-    </p-table>
+        </thead>
+        <tbody>
+            @for (dataItem of dataList; track $index) {
+                <tr>
+                    @for (col of cols; track $index) {
+                        @if(col.key === 'duration') {
+                            <td  [ngStyle]="{'width': calculatedWidth}">
+                                <div class="flex md:flex-row flex-col justify-center md:gap-6 gap-1">
+                                    @for (item of splitDuration(dataItem[col.key]); track $index) {
+                                        @if ($index === 1) {
+                                            <div>to</div>
+                                        }
+                                        <div class="w-32 flex justify-center items-center">{{item}}</div>
+                                    }
+                                </div>
+                            </td>
+                        } @else {
+                            <td class="">
+                                <div class="flex justify-center">
+                                    <div class="w-24"
+                                    [ngClass]="{
+                                        'text-center': col.key === 'totalSales',
+                                        'text-end': col.key !== 'totalSales',
+                                    }"
+                                    >
+                                        {{ dataItem[col.key] }}
+                                    </div>
+                                </div>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+      </table>
     </div>
 </div>

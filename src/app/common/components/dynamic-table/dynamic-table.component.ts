@@ -45,5 +45,13 @@ export class DynamicTableComponent {
 
     ngOnInit() {
 
-    } 
+    }
+
+    splitDuration(value: string) {
+      return value.split('-');
+    }
+
+    get calculatedWidth() {
+      return `${100/this.cols.length}%`
+    }
 }

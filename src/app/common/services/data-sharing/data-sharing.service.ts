@@ -29,4 +29,17 @@ export class DataSharingService extends BaseService {
   setUserCompanies(settings: any) {
     this._userCompanies.set(settings);
   }
+
+  angularToMomentFormat(angularFormat: string){
+    const formatMap: any = {
+      'dd MMM yyyy': 'DD MMM YYYY',
+      'dd/MM/yyyy': 'DD/MM/YYYY',
+      'yyyy-MM-dd': 'YYYY-MM-DD',
+      'MM/dd/yyyy': 'MM/DD/YYYY',
+      'MMMM dd, yyyy': 'MMMM DD, YYYY',
+      'dd-MM-yyyy': 'DD-MM-YYYY'
+    };
+  
+    return formatMap[angularFormat] || angularFormat; // Return the mapped format or the original if not found
+  };
 }

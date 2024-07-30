@@ -1,8 +1,13 @@
 <app-page-header [heading]="'My reports'" [heading2]="'Reports'" [buttonLabel]="'Report'" [showActionButton]="false"></app-page-header>
-<div class="custom-page-container w-full flex justify-center mt-12">
+<div class="custom-page-container w-full flex justify-center mt-12 print:mt-0">
     <div class="w-full">
         <p-accordion [multiple]="true" [activeIndex]="">
-            <p-accordionTab header="Sales Summary">
+            <p-accordionTab>
+                <ng-template pTemplate="header">
+                    <div class="print:hidden">
+                        Sales Summary
+                    </div>
+                </ng-template>
                 <app-sales-summary></app-sales-summary>
             </p-accordionTab>
             <!-- <p-accordionTab header="Header II">

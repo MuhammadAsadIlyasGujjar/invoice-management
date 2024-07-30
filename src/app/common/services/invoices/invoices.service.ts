@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { BaseService } from '../base/base.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Invoice, InvoicesJsonResponse, InvoicesPaginator } from '@common/interfaces/invoices.interface';
 
@@ -86,5 +86,14 @@ export class InvoicesService  extends BaseService {
           return response;
         })
       );
+  }
+
+  public getSalesSummary$(startDate: string, endDate: string, granularity: string): Observable<any> {
+    const params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate)
+      .set('granularity', granularity);
+
+    return this.http.get<any>(`/invoices/report/sales-summary`, { params });
   }
 }

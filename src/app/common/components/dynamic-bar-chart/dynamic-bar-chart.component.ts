@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { NgxEchartsModule } from 'ngx-echarts';
 
 @Component({
@@ -12,8 +12,15 @@ import { NgxEchartsModule } from 'ngx-echarts';
   templateUrl: './dynamic-bar-chart.component.html',
   styleUrl: './dynamic-bar-chart.component.scss'
 })
-export class DynamicBarChartComponent implements OnInit {
+export class DynamicBarChartComponent implements OnInit, OnChanges {
+  @Input() data: any[] = [];
   chartOptions: any;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if(changes?.['data'] && !changes?.['data'].firstChange) {
+      this.ngOnInit();
+    }
+  }
 
   ngOnInit(): void {
     this.chartOptions = {
@@ -28,7 +35,7 @@ export class DynamicBarChartComponent implements OnInit {
       },
       xAxis: {
         type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        data: this.data.map((record: { label: string; value: string; }) => record.label)
       },
       yAxis: {
         type: 'value'
@@ -37,7 +44,7 @@ export class DynamicBarChartComponent implements OnInit {
         {
           name: 'Sales',
           type: 'bar',
-          data: [150, 230, 224, 218, 135, 147, 260]
+          data: this.data.map((record: { label: string; value: string; }) => record.value)
         }
       ]
     };
