@@ -3,6 +3,7 @@ import { BaseService } from '../base/base.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Invoice, InvoicesJsonResponse, InvoicesPaginator } from '@common/interfaces/invoices.interface';
+import * as momentTimeZone from 'moment-timezone';
 
 @Injectable({
   providedIn: 'root'
@@ -92,7 +93,8 @@ export class InvoicesService  extends BaseService {
     const params = new HttpParams()
       .set('startDate', startDate)
       .set('endDate', endDate)
-      .set('granularity', granularity);
+      .set('granularity', granularity)
+      .set('timezone', momentTimeZone.tz.guess());
 
     return this.http.get<any>(`/invoices/report/sales-summary`, { params });
   }

@@ -45,8 +45,8 @@ filterForm: FormGroup;
     });
 
     this.filterParams.emit({
-      startDate: moment(startDate).format('YYYY-MM-DD'),
-      endDate: moment(endDate).format('YYYY-MM-DD'),
+      startDate: moment(startDate).startOf('day').toDate(),
+      endDate: moment(endDate).endOf('day').toDate(),
       granularity: defaultGranularity
     })
 
@@ -54,8 +54,8 @@ filterForm: FormGroup;
       next: (filterFormData) => {
         if(this.filterForm.valid) {
           const [fromDate, toDate] = filterFormData.rangeDates;
-          const startDate = moment(fromDate).format('YYYY-MM-DD');
-          const endDate = moment(toDate).format('YYYY-MM-DD');
+          const startDate = moment(fromDate).startOf('day').toDate();
+          const endDate = moment(toDate).endOf('day').toDate();
 
           this.filterParams.emit({
             startDate,

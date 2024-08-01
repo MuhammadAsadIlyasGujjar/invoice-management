@@ -31,10 +31,10 @@ export class DynamicBarChartComponent implements OnInit, OnChanges {
         trigger: 'axis'
       },
       legend: {
-        data: ['Sales']
+        data: ['Revenue']
       },
       xAxis: {
-        type: 'category',
+        type: 'Date Range',
         data: this.data.map((record: { label: string; value: string; }) => record.label)
       },
       yAxis: {
@@ -42,7 +42,7 @@ export class DynamicBarChartComponent implements OnInit, OnChanges {
       },
       series: [
         {
-          name: 'Sales',
+          name: 'Revenue',
           type: 'bar',
           data: this.data.map((record: { label: string; value: string; }) => record.value)
         }

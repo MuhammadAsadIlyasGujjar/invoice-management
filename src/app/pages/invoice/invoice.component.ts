@@ -19,6 +19,7 @@ import { CurrencyService } from '@common/services/currency/currency.service';
 import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module';
 import { ToastWrapperModule } from '@common/shared/toast.module';
 import { TranslateModule } from '@ngx-translate/core';
+import { convertToDate, convertToStartAndEndOfDayInUTC } from '@common/funtions/convert-date';
 
 @Component({
   selector: 'app-invoice',
@@ -128,10 +129,11 @@ export class InvoiceComponent implements OnInit {
     if (event && this.selectedOption.value === 'customer') {
       const inputElement = event.target as HTMLInputElement;
       this.searchSubject.next(inputElement.value.trim());  // Emit the trimmed value
-    } if (event && this.selectedOption.value === 'amountDue') {
+    } else if (event && this.selectedOption.value === 'amountDue') {
       this.searchSubject.next(this.searchValue);  // Emit the trimmed value
     } else {
-      this.searchSubject.next(this.searchValue);  // Emit the trimmed value
+      console.log(convertToStartAndEndOfDayInUTC(this.searchValue))
+      this.searchSubject.next(convertToDate(this.searchValue));  // Emit the trimmed value
     }
   }
 

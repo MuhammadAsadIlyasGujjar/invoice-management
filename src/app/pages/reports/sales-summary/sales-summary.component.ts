@@ -45,7 +45,9 @@ export class SalesSummaryComponent implements OnInit {
     // Use effect to react to signal changes
     effect(() => {
       this.userSettings = this.dataSharingService.userSettings();
-      this.momentDateFormat = this.dataSharingService.angularToMomentFormat(this.userSettings.dateFormat);
+      if (this.userSettings?.dateFormat) {
+        this.momentDateFormat = this.dataSharingService.angularToMomentFormat(this.userSettings.dateFormat);
+      }
     }, options);
   }
 
