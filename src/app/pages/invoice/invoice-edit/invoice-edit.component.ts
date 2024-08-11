@@ -13,7 +13,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { TooltipModule } from 'primeng/tooltip';
-import { debounceTime, Observable, of, Subject, Subscription, takeUntil } from 'rxjs';
+import { catchError, debounceTime, map, Observable, of, Subject, Subscription, takeUntil } from 'rxjs';
 import { serverUrl } from '@environment';
 import { InvoicesService } from '@common/services/invoices/invoices.service';
 import { ToastWrapperModule } from '@common/shared/toast.module';
@@ -25,6 +25,7 @@ import { ReceiveStockComponent } from '@pages/items/receive-stock/receive-stock.
 import { MenuModule } from 'primeng/menu';
 import { Item } from '@common/interfaces/items.interface';
 import { TranslateModule } from '@ngx-translate/core';
+import { AuthService } from '@common/services/auth/auth.service';
 
 @Component({
   selector: 'app-invoice-edit',
@@ -62,6 +63,7 @@ export class InvoiceEditComponent {
   private confirmationService: ConfirmationService = inject(ConfirmationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
 
   customers!: SelectItem[];
   items!: any[];
@@ -305,6 +307,24 @@ export class InvoiceEditComponent {
 
   addItem(): void {
     this.itemsFormArray.push(this.createItem());
+
+    if (!this.authService.isAuthenticated()) {
+      this.authService.refreshToken().pipe(
+        map((response: any) => {
+          if (!response?.accessToken) {
+            // Token refresh failed, redirect to the sign-in page
+            this.showMessage('Session Expired', 'Please login again to continue');
+            this.router.navigate(['/auth/sign-in']);
+          }
+        }),
+        catchError((err: any) => {
+          // Error occurred during token refresh, redirect to the sign-in page
+          this.router.navigate(['/auth/sign-in']);
+          this.showMessage('Session Expired', 'Please login again to continue');
+          return of(err);
+        })
+      ).subscribe();
+    }
   }
 
   removeItem(index: number): void {
@@ -436,6 +456,14 @@ export class InvoiceEditComponent {
   navigateToInvoice(invoiceId: string | number): void {
     // Navigate to the invoice detail route with the given id
     this.router.navigate(['/invoice', invoiceId]);
+  }
+
+  showMessage(summary:string, detail: string, severity: string = 'error') {
+    this.messageService.add({
+      severity: severity,
+      summary: summary,
+      detail: detail
+    });
   }
 
 }

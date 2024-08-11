@@ -1,0 +1,5 @@
+<p-dialog [(visible)]="openLoginDialog" [modal]="true" [closable]="false" [style]="{width: '400px'}">
+  <ng-template pTemplate="content">
+    <app-login [isDialog]="true" (logInSuccessEvent)="logInSuccessEvent()"></app-login>
+  </ng-template>
+</p-dialog>

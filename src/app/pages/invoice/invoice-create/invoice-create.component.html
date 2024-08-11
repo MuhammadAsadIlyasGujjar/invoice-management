@@ -11,6 +11,7 @@
     (cancelEvent)="onStockReceiveCancel($event)"
     ></app-receive-stock-form>
 </app-confirm-dialog>
+<app-login-dialog [openLoginDialog]="openLoginDialog" (loggedInEvent)="loginSuccessEvent()"></app-login-dialog>
 <app-page-header class="print:hidden" [heading]="'DELIVERY_NOTE.TITLE'" [heading2]="'DELIVERY_NOTE.TITLE'" [showActionButton]="false"></app-page-header>
 <div class="print:hidden mt-12 flex flex-col sm:flex-row w-full justify-between">
     <div class="m-4 flex flex-col justify-center">

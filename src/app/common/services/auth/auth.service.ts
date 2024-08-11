@@ -55,15 +55,18 @@ export class AuthService {
     return this.http.post<any>(this.logoutUrl, null);
   }
 
-  refreshToken(): Observable<any> {
+  refreshToken(canRedirect: boolean = true): Observable<any> {
     return this.http.post<any>(this.refreshTokenUrl, {user:this.getRefreshToken()})
       .pipe(
         tap(response => {
           this.accessToken = response.accessToken.access_token;
         }),
         catchError(error => {
-          // Handle the error and redirect to /auth/sign-in
-          this.router.navigate(['/auth/sign-in']);
+          if (canRedirect) {
+            // Handle the error and redirect to /auth/sign-in
+            this.router.navigate(['/auth/sign-in']);
+          }
+
           return throwError(() => new Error(error));
         })
       );
@@ -97,7 +100,17 @@ export class AuthService {
     // Example implementation assuming the token contains an 'exp' claim
     const token = this.accessToken;
     if (token) {
-      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+      const splittedToken = token.split('.')
+      if (splittedToken?.length < 3) {
+        return null;
+      }
+
+      const alotOutput = atob(splittedToken[1]);
+
+      if(!isValidJSON(alotOutput)) {
+        return null
+      }
+      const tokenPayload = JSON.parse(alotOutput);
       const expiryTime = tokenPayload.exp * 1000; // Convert expiry time from seconds to milliseconds
       return new Date(expiryTime);
     }
@@ -107,11 +120,19 @@ export class AuthService {
 
   parseJwt(token: string | null) {
     if (token) {
-      const base64Url = token.split('.')[1];
+      const splittedToken = token.split('.')
+      if (splittedToken?.length < 3) {
+        return null;
+      }
+      const base64Url = splittedToken[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(Buffer.from(base64, 'base64').toString().split('').map(function(c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
       }).join(''));
+
+      if(!isValidJSON(jsonPayload)) {
+        return null
+      }
   
       return JSON.parse(jsonPayload);
     }
@@ -133,6 +154,15 @@ export class AuthService {
     if (hasPermission) {
       return true;
     }
+    return false;
+  }
+}
+
+function isValidJSON(value: string): boolean {
+  try {
+    JSON.parse(value);
+    return true;
+  } catch (e) {
     return false;
   }
 }

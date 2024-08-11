@@ -13,7 +13,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { TooltipModule } from 'primeng/tooltip';
-import { debounceTime, Observable, Subject, takeUntil } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, Observable, of, Subject, takeUntil } from 'rxjs';
 import { serverUrl } from '@environment';
 import { InvoicesService } from '@common/services/invoices/invoices.service';
 import { ToastWrapperModule } from '@common/shared/toast.module';
@@ -27,6 +27,8 @@ import { ReceiveStockFormComponent } from '@pages/items/receive-stock-form/recei
 import { Item } from '@common/interfaces/items.interface';
 import { TranslateModule } from '@ngx-translate/core';
 import { isArray } from 'lodash';
+import { AuthService } from '@common/services/auth/auth.service';
+import { LoginDialogComponent } from '@pages/auth/login-dialog/login-dialog.component';
 
 @Component({
   selector: 'app-invoice-create',
@@ -37,6 +39,7 @@ import { isArray } from 'lodash';
     AddCustomerComponent,
     ConfirmDialogComponent,
     ReceiveStockFormComponent,
+    LoginDialogComponent,
     RouterLink,
     RouterLinkActive,
     DropdownModule,
@@ -65,6 +68,7 @@ export class InvoiceCreateComponent {
   private confirmationService: ConfirmationService = inject(ConfirmationService);
   private router = inject(Router);
   private inventoryService = inject(InventoryService);
+  private authService = inject(AuthService);
 
   customers!: SelectItem[];
   items!: any[];
@@ -82,6 +86,7 @@ export class InvoiceCreateComponent {
 
   selectedItemId!: string;
   selectedItem!: Item | null;
+  openLoginDialog: boolean = false;
 
   constructor() {
     this.customers = [];
@@ -217,7 +222,13 @@ export class InvoiceCreateComponent {
     this.invoiceForm.get('subtotal')?.disable();
 
     // Subscribe to form changes to calculate totals
-    this.invoiceForm.valueChanges.subscribe(() => {
+    this.invoiceForm.valueChanges
+    .pipe(
+      debounceTime(300), // Wait for 300ms pause in events
+      distinctUntilChanged() // Only emit when the current value is different than the last
+    )
+    .subscribe(() => {
+      this.checkAuthorization();
       this.hasUnsavedChanges = true;
       this.updateTotals();
     });
@@ -232,6 +243,23 @@ export class InvoiceCreateComponent {
       }
     });
 
+  }
+
+  checkAuthorization() {
+    if (!this.authService.isAuthenticated()) {
+      this.authService.refreshToken(false).pipe(
+        catchError((err: any) => {
+          // Error occurred during token refresh, redirect to the sign-in page
+          this.showMessage('Session Expired', 'Please login again to continue');
+          this.openLoginDialog = true;
+          return of(err);
+        })
+      ).subscribe();
+    }
+  }
+
+  loginSuccessEvent() {
+    this.showMessage('Welcome Back!', 'You have successfully logged in.', 'success');
   }
 
   onCustomerAdded(customer: Customer) {
@@ -284,6 +312,8 @@ export class InvoiceCreateComponent {
   addItem(): void {
     this.itemsFormArray.push(this.createItem());
   }
+
+
 
   removeItem(index: number): void {
     if(this.itemsFormArray?.length) {

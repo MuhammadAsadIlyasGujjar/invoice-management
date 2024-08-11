@@ -98,4 +98,22 @@ export class InvoicesService  extends BaseService {
 
     return this.http.get<any>(`/invoices/report/sales-summary`, { params });
   }
+
+  public getSalesByProduct$(startDate: string, endDate: string): Observable<any> {
+    const params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate)
+      .set('timezone', momentTimeZone.tz.guess());
+
+    return this.http.get<any>(`/invoices/report/by-product`, { params });
+  }
+
+  public getSalesByCustomer$(startDate: string, endDate: string): Observable<any> {
+    const params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate)
+      .set('timezone', momentTimeZone.tz.guess());
+
+    return this.http.get<any>(`/invoices/report/by-customer`, { params });
+  }
 }

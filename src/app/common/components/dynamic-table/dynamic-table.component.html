@@ -26,10 +26,10 @@
                         } @else {
                             <td class="">
                                 <div class="flex justify-center">
-                                    <div class="w-24"
+                                    <div
                                     [ngClass]="{
-                                        'text-center': col.key === 'totalSales',
-                                        'text-end': col.key !== 'totalSales',
+                                        'w-24 text-end': col.type === 'number',
+                                        'w-full text-start': col.type === 'string'
                                     }"
                                     >
                                         {{ dataItem[col.key] }}

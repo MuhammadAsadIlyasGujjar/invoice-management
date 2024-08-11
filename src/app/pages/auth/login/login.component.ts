@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '@common/services/auth/auth.service';
@@ -15,6 +15,9 @@ import { ToastWrapperModule } from '@common/shared/toast.module';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
+  @Input() isDialog: boolean = false;
+  // Create an EventEmitter instance and decorate it with @Output
+  @Output() logInSuccessEvent = new EventEmitter<string>();
   signInForm: FormGroup;
   errorMessage: any;
   isSubmitted = false;
@@ -60,7 +63,11 @@ export class LoginComponent {
           // Assuming the response contains the accessToken and refreshToken
           const { access_token, refresh_token } = response.accessToken;
           this.authService.setTokens(access_token, refresh_token);
-          this.router.navigate(['/']);
+          if (!this.isDialog) {
+            this.router.navigate(['/']);
+          } else {
+            this.logInSuccessEvent.emit();
+          }
         },
         (error: any) => {
           if (error?.status === 401) {

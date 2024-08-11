@@ -10,10 +10,18 @@
                     [readonlyInput]="true" 
                 />
             </div>
-            <div class="sm:w-1/2 w-full flex justify-center sm:justify-end">
+            <div class="sm:w-1/2 w-full flex gap-6 items-center justify-center sm:justify-end">
+                @if(type === 'sort') {
+                    <i
+                        [ngClass]="{
+                            'pi-sort-amount-down': selectedSortOrder === 'desc',
+                            'pi-sort-amount-up': selectedSortOrder === 'asc',
+                        }"
+                        class="pi cursor-pointer" (click)="onToggleSort()" style="font-size: 2rem"></i>
+                }
                 <p-selectButton 
-                    formControlName="granularity"
-                    [options]="granularityOptions"
+                    formControlName="option"
+                    [options]="options"
                     optionLabel="name" 
                     optionValue="value"
                 />

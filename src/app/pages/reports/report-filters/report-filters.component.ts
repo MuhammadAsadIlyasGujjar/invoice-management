@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import moment from 'moment';
 import { CalendarModule } from 'primeng/calendar';
@@ -13,12 +13,17 @@ import { SelectButtonModule } from 'primeng/selectbutton';
   styleUrl: './report-filters.component.scss'
 })
 export class ReportFiltersComponent {
-filterForm: FormGroup;    
-  granularityOptions: any[] = [
+  filterForm: FormGroup;    
+  @Input() options: any[] = [
       { name: 'Monthly', value: 'monthly' },
       { name: 'Weekly', value: 'weekly' },
       { name: 'Daily', value: 'daily' }
   ];
+  @Input() defaultOption: string = 'monthly';
+
+  @Input() type: string | null = null;
+
+  @Input() sortOrder: string = 'desc';
   
   @Output('filterParamsChanged') filterParams: any = new EventEmitter<any>();
 
@@ -26,7 +31,8 @@ filterForm: FormGroup;
     // Initialize the reactive form
     this.filterForm = this.fb.group({
       rangeDates: [[], [dateRangeValidator()]],  // Use an array to hold start and end dates
-      granularity: ['', Validators.required]   // Form control for granularity
+      option: ['', Validators.required],   // Form control for option
+      sortOrder: 'desc'
     });
   }
 
@@ -36,18 +42,18 @@ filterForm: FormGroup;
     const startDate = moment(`${currentYear}-01-01`).toDate();
     const endDate = moment(`${currentYear}-12-31`).toDate();
 
-    const defaultGranularity: string = 'monthly';
-
     // Set default values in the form
     this.filterForm.patchValue({
       rangeDates: [startDate, endDate],
-      granularity: 'monthly'  // Default granularity
+      option: this.defaultOption,
+      sortOrder: this.sortOrder
     });
 
     this.filterParams.emit({
       startDate: moment(startDate).startOf('day').toDate(),
       endDate: moment(endDate).endOf('day').toDate(),
-      granularity: defaultGranularity
+      option: this.defaultOption,
+      sortOrder: this.sortOrder
     })
 
     this.filterForm.valueChanges.subscribe({
@@ -60,7 +66,8 @@ filterForm: FormGroup;
           this.filterParams.emit({
             startDate,
             endDate,
-            granularity: filterFormData.granularity
+            option: filterFormData.option,
+            sortOrder: filterFormData.sortOrder
           })
         }
       }
@@ -69,6 +76,17 @@ filterForm: FormGroup;
 
   onSubmit(): void {
     console.log(this.filterForm.value);
+  }
+
+  get selectedSortOrder() {
+    return this.filterForm.get('sortOrder')?.value;
+  }
+
+  onToggleSort() {
+    const newSortOrder = this.selectedSortOrder === 'asc' ? 'desc' : 'asc'
+    this.filterForm.patchValue({
+      sortOrder: newSortOrder
+    })
   }
 
 }
