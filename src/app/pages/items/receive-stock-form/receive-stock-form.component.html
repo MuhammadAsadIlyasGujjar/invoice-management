@@ -81,7 +81,10 @@
                 inputId="minmaxfraction" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="0" [step]="1"> </p-inputNumber>
                 <div *ngIf="receiveStockForm.get('totalStock')?.errors && receiveStockForm.get('totalStock')?.touched" class="text-red-600 text-sm mt-1">
                   <small *ngIf="receiveStockForm.get('totalStock')?.errors?.['required']">Total Stock is required.</small>
-                  <small *ngIf="receiveStockForm.get('totalStock')?.errors?.['min']">Total Stock must be positive.</small>
+                  <small *ngIf="receiveStockForm.get('totalStock')?.errors?.['min'] && receiveStockForm.get('totalStock')?.value && receiveStockForm.get('totalStock')?.value < 1">Total Stock must be positive.</small>
+                  <small *ngIf="receiveStockForm.get('totalStock')?.errors?.['min']">
+                    Received stock total must be more than {{ receiveStockForm.get('totalStock')?.errors?.['min']?.min }}, sold out items.
+                  </small>
                 </div>
               </div>
             </div>

@@ -260,6 +260,7 @@ export class InvoiceCreateComponent {
 
   loginSuccessEvent() {
     this.showMessage('Welcome Back!', 'You have successfully logged in.', 'success');
+    this.openLoginDialog = false;
   }
 
   onCustomerAdded(customer: Customer) {

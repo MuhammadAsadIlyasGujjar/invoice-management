@@ -8,6 +8,7 @@
         "MANAGEMENT": "Management",
         "CUSTOMER_LIST": "Customer List",
         "ITEM_LIST": "Item List",
+        "EXPENSES": "Expenses",
         "MY_REPORTS": "My Reports",
         "SETTINGS": "Settings",
         "LOGOUT": "Logout"

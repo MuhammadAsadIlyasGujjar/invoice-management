@@ -118,34 +118,108 @@ export class AuthService {
     return null; // Return null if expiry date is not available
   }
 
-  parseJwt(token: string | null) {
-    if (token) {
-      const splittedToken = token.split('.')
-      if (splittedToken?.length < 3) {
+  // parseJwt(token: string | null) {
+  //   if (token) {
+  //     const splittedToken = token.split('.')
+  //     if (splittedToken?.length < 3) {
+  //       return null;
+  //     }
+  //     const base64Url = splittedToken[1];
+  //     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  //     const jsonPayload = decodeURIComponent(Buffer.from(base64, 'base64').toString().split('').map(function(c) {
+  //         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  //     }).join(''));
+
+  //     if(!isValidJSON(jsonPayload)) {
+  //       return null
+  //     }
+  
+  //     return JSON.parse(jsonPayload);
+  //   }
+  //   return null;
+  // }
+
+  parseJwt(token: string | null): any {
+    if (!token) {
+      return null;
+    }
+  
+    try {
+      const splittedToken = token.split('.');
+      if (splittedToken.length !== 3) {
         return null;
       }
+  
       const base64Url = splittedToken[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(Buffer.from(base64, 'base64').toString().split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-
-      if(!isValidJSON(jsonPayload)) {
-        return null
+  
+      // Adding padding if necessary
+      const paddedBase64 = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+  
+      // Decoding base64 safely without using decodeURIComponent
+      const jsonPayload = atob(paddedBase64);
+      
+      // Optionally check if the payload is valid JSON before parsing
+      if (!isValidJSON(jsonPayload)) {
+        return null;
       }
   
       return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Failed to parse JWT:', error);
+      return null;
     }
-    return null;
   }
 
+  // getPermissions(): string[] {
+  //   const authToken = this.getAccessToken()
+  //   if (authToken) {
+  //     const decodedToken = this.JWPHelper.decodeToken(authToken);
+  //     return decodedToken ? decodedToken.permissions : [];
+  //   }
+  //   return [];
+  // }
+
   getPermissions(): string[] {
-    const authToken = this.getAccessToken()
+    const authToken = this.getAccessToken();
     if (authToken) {
-      const decodedToken = this.JWPHelper.decodeToken(authToken);
-      return decodedToken ? decodedToken.permissions : [];
+      try {
+        const decodedToken = this.safeDecodeToken(authToken);
+        return decodedToken && Array.isArray(decodedToken.permissions) ? decodedToken.permissions : [];
+      } catch (error) {
+        // console.error('Failed to decode token or extract permissions:', error);
+        return [];
+      }
     }
     return [];
+  }
+  
+  private safeDecodeToken(token: string): any {
+    try {
+      const splittedToken = token.split('.');
+      if (splittedToken.length !== 3) {
+        throw new Error('Invalid token structure');
+      }
+  
+      const base64Url = splittedToken[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  
+      // Adding padding if necessary
+      const paddedBase64 = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+  
+      // Decode base64 using atob
+      const jsonPayload = atob(paddedBase64);
+  
+      // Optionally check if the payload is valid JSON before parsing
+      if (!isValidJSON(jsonPayload)) {
+        throw new Error('Invalid JSON payload in token');
+      }
+  
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      // console.error('Failed to safely decode JWT:', error);
+      throw error;  // Re-throw the error to be handled by the caller
+    }
   }
 
   hasPermission(validatePermission: string): boolean {

@@ -23,7 +23,7 @@ export class ReceiveStockFormComponent implements OnInit, OnChanges {
   @Input() data!: any;
   @Input() itemId!: any;
   @Input() selectedItem!: any;
-  @Input() nextLotNo!: number;
+  @Input() nextLotNo!: number | null;
   @Output() submitEvent = new EventEmitter<any>();
   @Output() cancelEvent = new EventEmitter<any>();
 
@@ -63,6 +63,17 @@ export class ReceiveStockFormComponent implements OnInit, OnChanges {
 
       this.receiveStockForm.patchValue(stockReceived);
       this.receiveStockForm.get('lotNo')?.disable();
+
+      this.receiveStockForm.get('stockReceivedDate')?.setValue(new Date(stockReceived.stockReceivedDate));
+      this.receiveStockForm.get('stockReceivedDate')?.disable();
+      
+
+
+      const totalStockControl = this.receiveStockForm.get('totalStock');
+      if (totalStockControl && stockReceived?.soldOutStock) {
+        totalStockControl.setValidators([Validators.required, Validators.min(stockReceived.soldOutStock)]);
+        totalStockControl.updateValueAndValidity();
+      }
       
     } else {
       this.resetForm();
@@ -84,6 +95,8 @@ export class ReceiveStockFormComponent implements OnInit, OnChanges {
       if(!!this.itemId && !this.receiveStockForm.get('item')?.value) {
         this.receiveStockForm.get('item')?.setValue(this.itemId);
       }
+
+      this.receiveStockForm.get('stockReceivedDate')?.enable();
 
     }
   }
@@ -110,7 +123,7 @@ export class ReceiveStockFormComponent implements OnInit, OnChanges {
 
   onSubmit() {
     if (this.receiveStockForm.valid) {
-      this.submitEvent.emit(this.receiveStockForm.value);
+      this.submitEvent.emit(this.receiveStockForm.getRawValue());
     }
   }
 

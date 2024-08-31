@@ -190,11 +190,13 @@
                                         <p class="w-[22rem] max-w-full mt-1 text-xs leading-5 text-gray-800" appShowMore [fullText]="inventory?.description" [limit]="45"></p>
                                     }
                                 </div>
-                                @if(userHasPermission('manage-stock') && (!inventory.soldOutStock || inventory.soldOutStock == 0)) {
+                                @if(userHasPermission('manage-stock')) {
                                     <div class="shrink-0 w-16 sm:flex sm:flex-col sm:items-start ml-4">
                                         <div class="mt-1 truncate text-xs leading-5 text-gray-800">
                                             <i (click)="updateReceivedStockAction($event, item, inventory)" class="material-icons action cursor-pointer mr-4">edit</i>
-                                            <i (click)="deleteInventoryStockAction($event, item, inventory)" class="material-icons action cursor-pointer">delete</i>
+                                            @if ((!inventory.soldOutStock || inventory.soldOutStock == 0)) {
+                                                <i (click)="deleteInventoryStockAction($event, item, inventory)" class="material-icons action cursor-pointer">delete</i>
+                                            }
                                         </div>
                                     </div>
                                 }

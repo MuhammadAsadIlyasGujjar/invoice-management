@@ -89,7 +89,7 @@ export class ItemsComponent extends BaseComponent {
   showStockReceivingDialog: boolean = false;
   selectedStockLot!: any;
   selectedItemId!: string | null;
-  nextLotNo!: number;
+  nextLotNo!: number | null;
   receivedStockMode: 'single' | 'bulk' = 'single';
   
   constructor(protected override authService: AuthService) {
@@ -299,7 +299,7 @@ export class ItemsComponent extends BaseComponent {
 
     this.selectedStockLot = null;
     this.receivedStockMode = mode;
-
+    this.nextLotNo = null;
     if (this.selectedItemId) {
       this.inventoryService.largestLotNo$(this.selectedItemId).subscribe(largestLotNo => {
         this.nextLotNo = largestLotNo + 1;
@@ -494,16 +494,9 @@ export class ItemsComponent extends BaseComponent {
     this.inventoryService.updateInventory$(data, inventoryId).subscribe({
       next: (response) => {
         this.showStockReceivingDialog = false;
-        this.selectedItem.totalAvailableStock += response.totalStock;
-        this.selectedItem.totalAvailableStock -= (this.selectedStockLot?.totalStock - this.selectedStockLot?.soldOutStock);
 
         this.selectedStockLot.createdAt = response.createdAt;
         this.selectedStockLot.deleted = response.deleted;
-        this.selectedStockLot.description = '';
-        setTimeout(() => {
-          this.selectedStockLot.description = response.description;
-          this.selectedStockLot = null;
-        }, 0)
         this.selectedStockLot.inUse = response.inUse;
         this.selectedStockLot.item = response.item;
         this.selectedStockLot.lotNo = response.lotNo;
@@ -513,11 +506,25 @@ export class ItemsComponent extends BaseComponent {
         this.selectedStockLot.totalStock = response.totalStock;
         this.selectedStockLot.updatedAt = response.updatedAt;
 
+        
+        this.selectedStockLot.description = '';
+        setTimeout(() => {
+          this.selectedStockLot.description = response.description;
+          
+          this.selectedStockLot = null;
+        }, 0)
+
+        const totalStockAllInventories = this.selectedItem.inventories.reduce((total: number, {totalStock}: any)=> { return total + totalStock }, 0);
+        const soldOutStockAllInventories = this.selectedItem.inventories.reduce((total: number, {soldOutStock}: any)=> { return total + soldOutStock }, 0);
+        this.selectedItem.totalAvailableStock = (totalStockAllInventories - soldOutStockAllInventories);
+
         this.selectedItem = null;
         this.selectedItemId = null;
         console.log('Update successful', response);
         // this.page$.next(1);
         // window.scrollTo(0, 0); 
+
+        this.showToastMessage('Successfully', 'Updated inventory.', 'success');
       },
       error: (error) => {
         console.error('Update failed', error);
@@ -624,9 +631,9 @@ export class ItemsComponent extends BaseComponent {
     }
   }
 
-  showError(summary:string, detail: string) {
+  showToastMessage(summary:string, detail: string, severity: string = 'error') {
     this.messageService.add({
-      severity: 'error',
+      severity: severity,
       summary: summary,
       detail: detail
     });
@@ -636,7 +643,7 @@ export class ItemsComponent extends BaseComponent {
     if (errorResp?.error?.message) {
       const { error, message } = errorResp?.error?.message;
       if (error && message) {
-        this.showError(error, message);
+        this.showToastMessage(error, message);
       }
     }
   }

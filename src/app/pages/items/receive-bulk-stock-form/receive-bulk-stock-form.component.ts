@@ -24,7 +24,7 @@ export class ReceiveBulkStockFormComponent {
   @Input() data!: any;
   @Input() itemId!: any;
   @Input() selectedItem!: any;
-  @Input() nextLotNo!: number;
+  @Input() nextLotNo!: number | null;
   @Output() submitEvent = new EventEmitter<any>();
   @Output() cancelEvent = new EventEmitter<any>();
 
