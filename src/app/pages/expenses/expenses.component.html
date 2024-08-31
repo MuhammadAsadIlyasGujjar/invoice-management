@@ -1,0 +1,22 @@
+<p-toast position="top-right"></p-toast>
+<p-confirmDialog></p-confirmDialog>
+<app-page-header [heading]="'Expense list'" [heading2]="'Expenses'" [buttonLabel]="'Expense'" (addClick)="onAddExpense($event)"
+ [showActionButton]="userHasPermission('manage-stock')"
+></app-page-header>
+<app-confirm-dialog [showDialog]="showExpenseUpdateDialog" (hide)="onHideUpdateDialog($event)" [title]="!selectedExpense ? 'Add Expense' : 'Update Expense'">
+</app-confirm-dialog>
+<div class="custom-page-container w-full flex justify-center">
+    <div class="my-4 lg:px-8 mt-16 flex flex-col w-full justify-center">
+        <p-dropdown
+            [options]="expenseCategories"
+            optionGroupLabel="label"
+            optionGroupChildren="items"
+            placeholder="Select an expense category"
+            [(ngModel)]="selectedCategory"
+            [group]="true"
+            [filter]="true"
+            filterBy="label"
+            [showClear]="true"
+        ></p-dropdown>
+    </div>
+</div>

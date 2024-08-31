@@ -96,6 +96,13 @@ export const routes: Routes = [
           canActivate: [AuthGuard] // Requires authentication
         },
         { 
+          path: 'expenses',
+          loadComponent: () => 
+            import('@pages/expenses/expenses.component')
+                .then(m => m.ExpensesComponent),
+          canActivate: [AuthGuard] // Requires authentication
+        },
+        { 
           path: 'reports',
           loadComponent: () => 
             import('@pages/reports/reports.component')

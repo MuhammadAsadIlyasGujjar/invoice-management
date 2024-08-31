@@ -4,7 +4,7 @@ export class ExpenseCategory {
     items?: ExpenseCategory[];
 }
 
-const expenseCategories: ExpenseCategory[] = [
+export const expenseCategories: ExpenseCategory[] = [
     {
         label: 'Cost of Goods Sold (COGS)',
         value: 'cogs',

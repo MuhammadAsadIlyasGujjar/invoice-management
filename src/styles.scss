@@ -19,42 +19,23 @@ $primary-color: var(--surface-900);
 
 /* width */
 ::-webkit-scrollbar {
-    scrollbar-width: thin;
+  width: 8px;
 }
- 
+
 /* Track */
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+  background: #f1f1f1;
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 5px;
+  background: #888;
 }
- 
+
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+  background: #555;
 }
-  
-  /* Styling for WebKit-based browsers */
-  .scroll-container::-webkit-scrollbar {
-    height: 4px; /* Height of the scrollbar */
-  }
-  
-  .scroll-container::-webkit-scrollbar-track {
-    background: #f1f1f1; /* Color of the track */
-  }
-  
-  .scroll-container::-webkit-scrollbar-thumb {
-    background: #888; /* Color of the scrollbar itself */
-  }
-  
-  /* Hover effect for the scrollbar thumb */
-  .scroll-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
   
   /* Firefox */
   .scroll-container {
