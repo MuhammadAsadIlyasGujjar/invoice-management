@@ -73,6 +73,9 @@ export class ReceiveStockFormComponent implements OnInit, OnChanges {
       if (totalStockControl && stockReceived?.soldOutStock) {
         totalStockControl.setValidators([Validators.required, Validators.min(stockReceived.soldOutStock)]);
         totalStockControl.updateValueAndValidity();
+      } else if (totalStockControl) {
+        totalStockControl.setValidators([Validators.required]);
+        totalStockControl.updateValueAndValidity();
       }
       
     } else {
@@ -114,6 +117,11 @@ export class ReceiveStockFormComponent implements OnInit, OnChanges {
       this.receiveStockForm.reset();
       this.receiveStockForm.markAsUntouched();
       this.receiveStockForm.markAsPristine();
+      const totalStockControl = this.receiveStockForm.get('totalStock');
+      if (totalStockControl) {
+        totalStockControl.setValidators([Validators.required]);
+        totalStockControl.updateValueAndValidity();
+      }
     }
   }
 
