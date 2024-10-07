@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { Component, CreateEffectOptions, effect, inject, OnInit } from '@angular/core';
+import { Component, CreateEffectOptions, effect, inject, OnDestroy, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '@common/components/layout/page-header/page-header.component';
 import { Invoice, InvoicesPaginator } from '@common/interfaces/invoices.interface';
 import { InvoicesService } from '@common/services/invoices/invoices.service';
@@ -19,7 +19,8 @@ import { CurrencyService } from '@common/services/currency/currency.service';
 import { ConfirmDialogWrapperModule } from '@common/shared/confirm-dialog.module';
 import { ToastWrapperModule } from '@common/shared/toast.module';
 import { TranslateModule } from '@ngx-translate/core';
-import { convertToDate, convertToStartAndEndOfDayInUTC } from '@common/funtions/convert-date';
+import { convertToDate, convertToStartAndEndOfDayInUTC, isValidDate } from '@common/funtions/convert-date';
+import { FilterService } from '@common/services/filter/filter.service';
 
 @Component({
   selector: 'app-invoice',
@@ -42,18 +43,19 @@ import { convertToDate, convertToStartAndEndOfDayInUTC } from '@common/funtions/
   templateUrl: './invoice.component.html',
   styleUrl: './invoice.component.scss'
 })
-export class InvoiceComponent implements OnInit {
+export class InvoiceComponent implements OnInit, OnDestroy {
   private api = inject(InvoicesService);
   private router = inject(Router);
   private dataSharingService = inject(DataSharingService);
   private currencyService = inject(CurrencyService);
   private confirmationService: ConfirmationService = inject(ConfirmationService);
   private messageService: MessageService = inject(MessageService);
+  private filterService: FilterService = inject(FilterService);
 
   userSettings!: any;
 
   public paginator$!: Observable<InvoicesPaginator>;
-  private searchSubject = new Subject<string>();
+  private searchSubject = new Subject<string | null>();
 
   public loading$ = new BehaviorSubject(true);
   private page$ = new BehaviorSubject(1);
@@ -120,6 +122,43 @@ export class InvoiceComponent implements OnInit {
       this.page$.next(1);
       window.scrollTo(0, 0); 
     });
+
+
+     // Get the stored filter state if it exists
+     const savedFilter = this.filterService.getFilterState();
+     if (savedFilter) {
+       this.params = savedFilter;
+
+       
+       const selectedOption = this.options.find((option: any) => option.value === savedFilter?.['searchField']);
+       if (selectedOption && savedFilter['searchField']) {
+         this.selectedOption = selectedOption;
+         const searchValue = savedFilter?.['search'] ?? undefined;
+
+         if (this.selectedOption?.value === 'date' || this.selectedOption?.value === 'dueDate') {
+
+          if (isValidDate(searchValue)) {
+            this.searchValue = new Date(searchValue);  // Emit the trimmed value
+          }
+
+         } else {
+          this.searchValue = searchValue;
+         }
+       }
+        // this.params['searchField'] = this.selectedOption.value;
+     } else {
+       this.resetFilters();
+     }
+  }
+
+  // Method to reset the filters (e.g., when no saved filter is found)
+  resetFilters() {
+    this.params = {};
+  }
+
+  // Save the filter when navigating away from /items
+  onNavigate() {
+    this.filterService.setFilterState(this.params);
   }
 
   onSearch(event: KeyboardEvent | null = null): void {
@@ -133,7 +172,13 @@ export class InvoiceComponent implements OnInit {
       this.searchSubject.next(this.searchValue);  // Emit the trimmed value
     } else {
       console.log(convertToStartAndEndOfDayInUTC(this.searchValue))
-      this.searchSubject.next(convertToDate(this.searchValue));  // Emit the trimmed value
+
+      if (isValidDate(this.searchValue)) {
+
+        this.searchSubject.next(convertToDate(this.searchValue));  // Emit the trimmed value
+      } else if(!this.searchValue) {
+        this.searchSubject.next('');
+      }
     }
   }
 
@@ -280,6 +325,10 @@ export class InvoiceComponent implements OnInit {
       return this.currencyService.getCurrencySymbol(this.userSettings.currency)
     }
     return '€';
+  }
+
+  ngOnDestroy(): void {
+    this.onNavigate();
   }
 
 }

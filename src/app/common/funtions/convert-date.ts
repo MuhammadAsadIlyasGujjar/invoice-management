@@ -17,6 +17,12 @@ export function convertToDate(localDateString: string) {
   return localDate.format();
 }
 
+export function isValidDate(localDateString: string) {
+  const localDate = moment.utc(localDateString, moment.ISO_8601, true); // Strict ISO 8601 parsing
+
+  return localDate.isValid();
+}
+
 export function convertToStartAndEndOfDayInUTC(dateString: string): { startOfDayUTC: string, endOfDayUTC: string } {
   // Parse the input date with timezone
   const localDate = moment.parseZone(dateString);
