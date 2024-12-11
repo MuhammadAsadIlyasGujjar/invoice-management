@@ -84,10 +84,7 @@ export class InvoiceComponent implements OnInit, OnDestroy {
   constructor() {
     this.paginator$ = this.loadInvoices$();
 
-    this.params['searchField'] = this.selectedOption.value;
-
-    this.params['sortBy'] = 'invoiceNumber';
-    this.params['sortOrder'] = 'desc';
+    this.resetFilters();
 
     const options: CreateEffectOptions = {
       allowSignalWrites: true
@@ -127,12 +124,14 @@ export class InvoiceComponent implements OnInit, OnDestroy {
      // Get the stored filter state if it exists
      const savedFilter = this.filterService.getFilterState();
      if (savedFilter) {
-       this.params = savedFilter;
+       this.params = {...this.params, ...savedFilter};
 
        
        const selectedOption = this.options.find((option: any) => option.value === savedFilter?.['searchField']);
        if (selectedOption && savedFilter['searchField']) {
          this.selectedOption = selectedOption;
+         // this.params['searchField'] = this.selectedOption.value;
+         
          const searchValue = savedFilter?.['search'] ?? undefined;
 
          if (this.selectedOption?.value === 'date' || this.selectedOption?.value === 'dueDate') {
@@ -145,7 +144,6 @@ export class InvoiceComponent implements OnInit, OnDestroy {
           this.searchValue = searchValue;
          }
        }
-        // this.params['searchField'] = this.selectedOption.value;
      } else {
        this.resetFilters();
      }
@@ -154,6 +152,10 @@ export class InvoiceComponent implements OnInit, OnDestroy {
   // Method to reset the filters (e.g., when no saved filter is found)
   resetFilters() {
     this.params = {};
+    this.params['searchField'] = this.selectedOption.value;
+
+    this.params['sortBy'] = 'invoiceNumber';
+    this.params['sortOrder'] = 'desc';
   }
 
   // Save the filter when navigating away from /items

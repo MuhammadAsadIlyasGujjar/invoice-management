@@ -80,7 +80,49 @@ export class PdfService {
     document.body.removeChild(clonedElement);
 
     return pdf.output('blob');
-}
+  }
+  
+  async generatePdfV3(element: HTMLElement): Promise<Blob> {
+      // Create a new jsPDF instance
+      const pdf = new jsPDF({
+          orientation: 'p',
+          unit: 'pt',
+          format: 'a4'
+      });
+  
+      // Ensure images are fully loaded before generating the PDF
+      await Promise.all(
+          Array.from(element.querySelectorAll('img')).map(img => {
+              return new Promise<void>((resolve, reject) => {
+                  if (img.complete) {
+                      resolve();
+                  } else {
+                      img.onload = () => resolve();
+                      img.onerror = () => reject(new Error('Image failed to load'));
+                  }
+              });
+          })
+      );
+  
+      // Use the html2canvas method to capture the element
+      const canvas = await html2canvas(element, {
+          scale: 2, // Increase scale for better quality
+          useCORS: true // To support images from other origins
+      });
+  
+      // Convert the canvas to an image
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = pdf.internal.pageSize.getWidth() * 0.8; // Set zoom level to 80%
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const xOffset = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2; // Calculate horizontal center offset
+  
+      pdf.addImage(imgData, 'PNG', xOffset, 0, pdfWidth, pdfHeight);
+  
+      // Output the PDF as a blob
+      return pdf.output('blob');
+  }
+  
+
 
 
 

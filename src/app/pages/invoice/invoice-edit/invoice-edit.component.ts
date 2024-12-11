@@ -14,7 +14,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { catchError, debounceTime, distinctUntilChanged, map, Observable, of, Subject, Subscription, takeUntil } from 'rxjs';
-import { serverUrl } from '@environment';
+import { serverUrl } from 'src/environments/environment';
 import { InvoicesService } from '@common/services/invoices/invoices.service';
 import { ToastWrapperModule } from '@common/shared/toast.module';
 import { Invoice, InvoiceItem } from '@common/interfaces/invoices.interface';
