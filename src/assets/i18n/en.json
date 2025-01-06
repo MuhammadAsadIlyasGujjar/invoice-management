@@ -5,6 +5,8 @@
         "DELIVERY_NOTE": "Delivery Note",
         "PROPOSALS": "Proposals",
         "INVOICE": "Invoice",
+        "CUSTOMER_ORDERS": "Customer Orders",
+        "ORDER_REQUESTS": "Submit Order",
         "MANAGEMENT": "Management",
         "CUSTOMER_LIST": "Customer List",
         "ITEM_LIST": "Item List",

@@ -82,6 +82,20 @@ export const routes: Routes = [
           canActivate: [AuthGuard] // Requires authentication
         },
         { 
+          path: 'customer-order',
+          loadComponent: () => 
+            import('@pages/customer-order/customer-order.component')
+                .then(m => m.CustomerOrderComponent),
+          canActivate: [AuthGuard] // Requires authentication
+        },
+        {
+          path: 'order-request',
+          loadComponent: () => 
+            import('@pages/order-request/order-request.component')
+                .then(m => m.OrderRequestComponent),
+          canActivate: [AuthGuard] // Requires authentication
+        },
+        { 
           path: 'customers',
           loadComponent: () => 
             import('@pages/customers/customers.component')

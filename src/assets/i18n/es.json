@@ -5,6 +5,7 @@
         "DELIVERY_NOTE": "Albarán",
         "PROPOSALS": "Propuestas",
         "INVOICE": "Factura",
+        "CUSTOMER-ORDERS": "Pedidos de clientes",
         "MANAGEMENT": "Gestión",
         "CUSTOMER_LIST": "Lista de clientes",
         "ITEM_LIST": "Lista de elementos",

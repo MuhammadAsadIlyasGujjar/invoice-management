@@ -1,0 +1,60 @@
+<app-page-header #triggerElement [heading]="'Make Order'" [heading2]="'Make Order'" [showActionButton]="false"></app-page-header>
+<!-- <app-confirm-dialog [showDialog]="true"></app-confirm-dialog> -->
+<div class="my-4 mx-12 mt-16">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 px-4">
+    @for (item of items; track $index) {
+      @defer (on viewport) {
+        <!-- Card Content -->
+        <div class="shrink-0 grow-0 max-w-[360px] mx-auto">
+          <a class="group flex flex-col justify-between rounded-xl border bg-white shadow-lg p-6 min-h-full">
+            <div class="group flex flex-col justify-start">
+              <div>
+                <div class="flex aspect-[3/2] overflow-hidden rounded-xl">
+                  <div class="relative h-full w-full transition duration-300 group-hover:scale-105">
+                    <img src="assets/placeholder-dark-1.svg" alt="Duis sem sem, gravida vel porttitor eu, volutpat ut arcu" class="h-full w-full object-cover">
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 flex justify-between">
+                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-900 text-white">
+                  {{ (item?.inventoryCount || 0) > 0 ? 'In Stock' : 'Out of Stock' }}
+                </div>
+                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-900 text-white">
+                  ${{ item.prices?.[0]?.salePrice || 0 }}  
+                </div>
+              </div>
+              <div class="mb-2 pt-4 text-lg font-medium lg:text-xl">
+                {{ item.name }}
+              </div>
+            </div>
+            <div class="flex items-center text-sm">
+              Read more
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 transition-transform group-hover:translate-x-1">
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </div>
+          </a>
+        </div>
+      }
+      @placeholder {
+        <!-- Placeholder Content -->
+        <div class="shrink-0 grow-0 max-w-[360px] mx-auto">
+          <div class="group flex flex-col justify-between rounded-xl border bg-gray-100 shadow-lg p-6 animate-pulse">
+            <div class="flex aspect-[3/2] overflow-hidden rounded-xl bg-gray-300"></div>
+            <div class="mt-6 flex justify-between">
+              <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-300 text-transparent">
+                Loading...
+              </div>
+              <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-300 text-transparent">
+                Loading...
+              </div>
+            </div>
+            <div class="mb-2 pt-4 text-lg font-medium lg:text-xl bg-gray-300 text-transparent h-5"></div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+     
+</div>

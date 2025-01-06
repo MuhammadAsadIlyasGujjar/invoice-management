@@ -6,11 +6,35 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration production --base-href ./",
+    "build:electron": "ng build --configuration production --base-href ./ && electron-builder",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:invoice-management": "node dist/invoice-management/server/server.mjs",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
+  },
+  "main": "electron-main.js",
+  "files": [
+    "dist/",
+    "electron-main.js"
+  ],
+  "build": {
+    "asar": false,
+    "appId": "com.example.invoice-management",
+    "files": [
+      "dist/",
+      "electron-main.js"
+    ],
+    "directories": {
+      "output": "dist/electron"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    }
   },
   "private": true,
   "dependencies": {
@@ -55,6 +79,8 @@
     "@types/lodash": "^4.14.202",
     "@types/node": "^18.18.0",
     "autoprefixer": "^10.4.18",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
     "gh-pages": "^6.1.1",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
