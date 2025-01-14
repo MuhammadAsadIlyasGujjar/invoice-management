@@ -456,17 +456,35 @@ export class ItemsComponent extends BaseComponent {
   receiveStock(data: any) {
     this.inventoryService.receiveInventory$(data).subscribe({
       next: (response) => {
-        this.showStockReceivingDialog = false;
-        this.selectedItem.totalAvailableStock += response.totalStock;
-        this.selectedItem.inventoryCount += 1;
+        // debugger;
+        // this.selectedItem.totalAvailableStock += response.totalStock;
+        // this.selectedItem.inventoryCount += 1;
 
-        if (this.selectedItem?.inventories?.length) {
-          this.selectedItem.inventories.push(response);
-        } else {
-          this.selectedItem.inventories = [response];
-        }
+        // if (this.selectedItem?.inventories?.length) {
+        //   this.selectedItem.inventories.push(response);
+        // } else {
+        //   this.selectedItem.inventories = [response];
+        // }
 
-        this.selectedItem = null;
+        this.inventoryService.inventoriesByItemId$(this.selectedItem._id).subscribe({
+          next: (response) => {
+            this.showStockReceivingDialog = false;
+            
+            console.log('Update successful', response);
+            this.selectedItem.inventories = response;
+
+            this.selectedItem.inventoryCount = response.length;
+            this.selectedItem.totalAvailableStock = this.sumAvailableStock(response ?? []);
+
+            this.selectedItem = null;
+          },
+          error: (error) => {
+            console.error('Update failed', error);
+            this.handleError(error);
+          }
+        });
+
+        // this.selectedItem = null;
         console.log('Update successful', response);
         // this.page$.next(1);
         // window.scrollTo(0, 0); 

@@ -113,7 +113,7 @@
                             <p class="text-sm leading-6 text-gray-900">Unit</p>
                             <p class="mt-1 text-xs leading-5 text-gray-500">{{item.baseUnitOfMeasure}}</p>
                         </div>
-                        <div class="hidden shrink-0 w-20 sm:flex sm:flex-col sm:items-end ml-4">
+                        <div class="hidden shrink-0 w-20 sm:flex sm:flex-col sm:items-end ml-4" [ngClass]="{'bg-orange-300': item?.totalAvailableStock && ((item?.totalAvailableStock ?? 0) < 0)}">
                             <p class="text-sm leading-6 text-gray-900">Total Stock</p>
                             <p class="mt-1 text-xs leading-5 text-gray-500"><span class="font-semibold">{{item?.totalAvailableStock ?? 0}}</span></p>
                         </div>
@@ -190,7 +190,7 @@
                                         <p class="w-[22rem] max-w-full mt-1 text-xs leading-5 text-gray-800" appShowMore [fullText]="inventory?.description" [limit]="45"></p>
                                     }
                                 </div>
-                                @if(userHasPermission('manage-stock')) {
+                                @if(userHasPermission('manage-stock') && inventory?.lotNo > 0) {
                                     <div class="shrink-0 w-16 sm:flex sm:flex-col sm:items-start ml-4">
                                         <div class="mt-1 truncate text-xs leading-5 text-gray-800">
                                             <i (click)="updateReceivedStockAction($event, item, inventory)" class="material-icons action cursor-pointer mr-4">edit</i>

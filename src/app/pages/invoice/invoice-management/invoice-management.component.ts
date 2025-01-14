@@ -92,7 +92,7 @@ export class InvoiceManagementComponent {
 
   getCommaSeparatedLotNo(lots: LotDetails[] | undefined): string {
     if (lots?.length) {
-      return lots.map(lot => lot.lotNo).join(', ');
+      return lots.map(lot => lot.lotNo === -1 ? '_' : lot.lotNo).join(', ');
     }
     return '';
   }
