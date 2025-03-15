@@ -86,7 +86,7 @@
                             </a>
                         </li>
                     } -->
-                    <!-- @if(userHasPermission('bills-management')) { 
+                    @if(userHasPermission('bills-management')) { 
                         <li>
                             <a [routerLink]="'/customer-order'" [routerLinkActive]="['bg-gray-100']" class="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-100 hover:border-b-2  group">
                                 <app-svg-icon [icon]="'bill'"></app-svg-icon>
@@ -101,7 +101,7 @@
                                 <span class="flex-1 ms-3 whitespace-nowrap">{{'NAV_BAR.ORDER_REQUESTS' | translate}}</span>
                             </a>
                         </li>
-                    } -->
+                    }
                 </ul>
             }
             @if(
@@ -129,14 +129,14 @@
                            </a>
                         </li>
                     }
-                    <!-- @if(userHasPermission('reports-management')) {
+                    @if(userHasPermission('reports-management')) {
                         <li>
                             <a [routerLink]="'/expenses'" [routerLinkActive]="['bg-gray-100']" class="flex items-center p-2 text-gray-900 transition duration-75 rounded-lg hover:bg-gray-100 hover:border-b-2   group">
                                 <app-svg-icon [icon]="'expenses'"></app-svg-icon>
                                 <span class="ms-3">{{'NAV_BAR.EXPENSES' | translate}}</span>
                             </a>
                         </li>
-                    } -->
+                    }
                     @if(userHasPermission('reports-management')) {
                         <li>
                             <a [routerLink]="'/reports'" [routerLinkActive]="['bg-gray-100']" class="flex items-center p-2 text-gray-900 transition duration-75 rounded-lg hover:bg-gray-100 hover:border-b-2   group">

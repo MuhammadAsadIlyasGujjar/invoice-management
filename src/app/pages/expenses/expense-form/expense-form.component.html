@@ -1,0 +1,125 @@
+<form [formGroup]="form" class="grid gap-4">
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Left Column -->
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Date</label>
+          <div class="h-10 custom-input-class">
+            <p-calendar 
+              formControlName="date"
+              [showIcon]="true"
+              class="w-full"
+            ></p-calendar>
+          </div>
+        </div>
+  
+        <div>
+          <label class="block text-sm font-medium mb-1">Amount</label>
+          <div class="h-10 custom-input-class">
+            <p-inputNumber 
+            formControlName="amount"
+            mode="currency"
+            [currency]="form.get('currency')?.value"
+            locale="en-US"
+            class="w-full"
+          ></p-inputNumber>
+          </div>
+        </div>
+  
+        <div>
+          <label class="block text-sm font-medium mb-1">Currency</label>
+          <div class="h-10 custom-input-class">
+            <p-dropdown 
+            formControlName="currency"
+            [options]="currencies"
+            class="w-full"
+          ></p-dropdown>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Right Column -->
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Category</label>
+          <div class="h-10 custom-input-class">
+            <p-dropdown
+                [options]="expenseCategories"
+                optionGroupLabel="label"
+                optionGroupChildren="items"
+                placeholder="Category"
+                formControlName="category"
+                [group]="true"
+                [filter]="true"
+                filterBy="label"
+                [showClear]="true"
+                class="w-full"
+            ></p-dropdown>
+          </div>
+        </div>
+  
+        <div>
+          <label class="block text-sm font-medium mb-1">Payment Method</label>
+          <div class="h-10 custom-input-class">
+            <p-dropdown
+            formControlName="payment_method"
+            [options]="paymentMethods"
+            class="w-full"
+          ></p-dropdown>
+          </div>
+        </div>
+  
+        <div>
+          <label class="block text-sm font-medium mb-1">Status</label>
+          <div class="h-10 custom-input-class">
+            <p-dropdown
+            formControlName="status"
+            [options]="statuses"
+            class="w-full"
+          ></p-dropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="grid gap-3">
+      <div>
+        <label class="block text-sm font-medium mb-1">Vendor</label>
+        <div class="custom-input-class">
+            <input pInputText formControlName="vendor" class="w-full">
+        </div>
+      </div>
+  
+      <div>
+        <label class="block text-sm font-medium mb-1">Description</label>
+        <div class="w-full custom-input-border">
+            <textarea pInputTextarea formControlName="description" rows="3" class="w-full"></textarea>
+        </div>
+      </div>
+  
+      <div>
+        <label class="block text-sm font-medium mb-1">Tags</label>
+        <div class="h-10 custom-input-class">
+            <input pInputText formControlName="tags" class="w-full" placeholder="Comma separated tags">
+        </div>
+      </div>
+  
+      <div class="flex items-center gap-2">
+        <p-checkbox formControlName="is_recurring" [binary]="true" class="custom-input-border"></p-checkbox>
+        <label class="text-sm">Recurring Expense</label>
+      </div>
+    </div>
+  
+    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+      <button
+        (click)="onSubmit()" 
+        type="submit" 
+        class="inline-flex w-full justify-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 sm:ml-3 sm:w-auto"
+        >Save</button>
+      <button 
+        (click)="cancel.emit()"
+        type="button" 
+        class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+        >Cancel</button>
+    </div>
+  </form>
