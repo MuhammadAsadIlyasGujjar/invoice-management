@@ -1,6 +1,6 @@
 export interface Expense {
     expense_id: string;
-    date: Date;
+    date: Date | null; // Allow null
     amount: number;
     category: string;
     payment_method: string;
