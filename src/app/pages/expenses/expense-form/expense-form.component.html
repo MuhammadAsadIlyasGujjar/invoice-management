@@ -14,6 +14,16 @@
         </div>
   
         <div>
+          <label class="block text-sm font-medium mb-1">Currency</label>
+          <div class="h-10 custom-input-class">
+            <p-dropdown 
+            formControlName="currency"
+            [options]="currencies"
+            class="w-full"
+          ></p-dropdown>
+          </div>
+        </div>
+                <div>
           <label class="block text-sm font-medium mb-1">Amount</label>
           <div class="h-10 custom-input-class">
             <p-inputNumber 
@@ -23,17 +33,6 @@
             locale="en-US"
             class="w-full"
           ></p-inputNumber>
-          </div>
-        </div>
-  
-        <div>
-          <label class="block text-sm font-medium mb-1">Currency</label>
-          <div class="h-10 custom-input-class">
-            <p-dropdown 
-            formControlName="currency"
-            [options]="currencies"
-            class="w-full"
-          ></p-dropdown>
           </div>
         </div>
       </div>
